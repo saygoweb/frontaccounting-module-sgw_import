@@ -1,0 +1,77 @@
+<?php
+namespace SGW_Import\Model;
+
+use Anorm\Anorm;
+use Anorm\DataMapper;
+use Anorm\Model;
+use Anorm\Transform\FunctionTransform;
+use SGW\DB;
+use SGW_Import\Import\Column;
+
+class ImportFileTypeModel extends Model
+{
+    public function __construct()
+    {
+        $pdo = Anorm::pdo();
+        parent::__construct($pdo, DataMapper::createByClass($pdo, $this, DB::tablePrefix()));
+        $this->_mapper->mode = DataMapper::MODE_DYNAMIC;
+        $this->_mapper->transformers['columns'] = new FunctionTransform(
+            function ($data) {
+                return explode(',', $data);
+            },
+            function ($data) {
+                return implode(',', $data);
+            }
+        );
+        $this->_mapper->transformers['hide'] = new FunctionTransform(
+            function ($data) {
+                return explode(',', $data);
+            },
+            function ($data) {
+                return implode(',', $data);
+            }
+        );
+        $this->columns = [];
+        $this->hide = [];
+    }
+
+    /** @return ImportFileTypeModel | null */
+    public static function findByBankId($bankId)
+    {
+        $result = DataMapper::find(ImportFileTypeModel::class, Anorm::pdo())
+            ->where('bank_id=:bankId', [ ':bankId' => $bankId])
+            ->one();
+        return $result;
+    }
+
+    /** @return ImportFileTypeModel | null */
+    public static function findOne()
+    {
+        $result = DataMapper::find(ImportFileTypeModel::class, Anorm::pdo())
+            ->limit(1)
+            ->one();
+        return $result;
+    }
+
+    /** 
+     * @return bool
+     */
+    public static function delete($id)
+    {
+        $model = new ImportFileTypeModel();
+        return $model->_mapper->delete($id);
+    }
+
+    /** @var int */
+    public $id;
+
+    /** @var int */
+    public $bankId;
+
+    /** @var string[] */
+    public $columns;
+
+    /** @var string[] */
+    public $hide;
+
+}

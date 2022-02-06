@@ -1,0 +1,15 @@
+{
+    "name": "saygoweb/frontaccounting-module-sgw_import",
+    "description": "Bank data import module for FrontAccounting",
+    "type": "project",
+    "license": "GPLV3",
+    "require": {
+        "saygoweb/anorm": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "SGW\\": "includes/common/",
+            "SGW_Import\\": "includes/"
+        }
+    }
+}
