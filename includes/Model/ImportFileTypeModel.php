@@ -6,7 +6,6 @@ use Anorm\DataMapper;
 use Anorm\Model;
 use Anorm\Transform\FunctionTransform;
 use SGW\DB;
-use SGW_Import\Import\Column;
 
 class ImportFileTypeModel extends Model
 {
@@ -40,7 +39,7 @@ class ImportFileTypeModel extends Model
     {
         $result = DataMapper::find(ImportFileTypeModel::class, Anorm::pdo())
             ->where('bank_id=:bankId', [ ':bankId' => $bankId])
-            ->one();
+            ->oneOrThrow();
         return $result;
     }
 
@@ -60,6 +59,15 @@ class ImportFileTypeModel extends Model
     {
         $model = new ImportFileTypeModel();
         return $model->_mapper->delete($id);
+    }
+
+    public function columnKey($name)
+    {
+        $result = array_search($name, $this->columns);
+        if ($result === false) {
+            throw new \Exception("Column '$name' not found");
+        }
+        return $result;
     }
 
     /** @var int */

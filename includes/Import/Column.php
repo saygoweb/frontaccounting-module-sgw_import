@@ -27,19 +27,4 @@ class Column
         return $columns;
     }
 
-    /**
-     * @param Column[] $columns
-     * @return string[]
-     */
-    public static function names(array $columns)
-    {
-        $result = [];
-        foreach ($columns as $column) {
-            $result[$column->name] = $column->name;
-        }
-        return $result;
-        // return array_map(function ($e) {
-        //     return $e->name;
-        // }, $columns);
-    }
 }

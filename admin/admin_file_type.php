@@ -67,9 +67,11 @@ class AdminFileTypeView
         $header[] = _('Party Column');
         $header[] = _('Match');
         $header[] = _('Type');
+        $header[] = _('Code');
         $header[] = _('Document Column');
         $header[] = _('Match');
         $header[] = _('Type');
+        $header[] = _('Code');
         $header[] = ''; // Button
 
         table_header($header);
@@ -91,10 +93,12 @@ class AdminFileTypeView
         label_cell($lineModel->partyField);
         label_cell($lineModel->partyMatch);
         label_cell($lineModel->partyType);
+        label_cell($lineModel->partyCode);
 
-        label_cell('');
-        label_cell('');
+        label_cell($lineModel->docField);
+        label_cell($lineModel->docMatch);
         label_cell($lineModel->docType);
+        label_cell($lineModel->docCode);
 
         // label_cell('');
         hyperlink_params_td('../import_line.php', 'Edit Line', 'id=' . $lineModel->id);

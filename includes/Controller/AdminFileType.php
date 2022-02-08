@@ -48,10 +48,7 @@ class AdminFileType
 
     public function columns(ImportFileTypeModel $fileTypeModel)
     {
-        $columnNames = array_map(function($e) {
-            return $e->name;
-        }, $fileTypeModel->columns);
-        return implode(',', $columnNames);
+        return implode(',', $fileTypeModel->columns);
     }
 
     public function hide(ImportFileTypeModel $fileTypeModel)

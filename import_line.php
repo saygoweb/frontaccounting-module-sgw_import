@@ -37,7 +37,10 @@ class ImportLineView
 
     public function view(ImportLineModel $lineModel, ImportFileTypeModel $fileTypeModel)
     {
-        Mapper::writeArray($lineModel, $_POST);
+        Mapper::writeArray($lineModel, $_POST, ['partyField', 'docField']);
+        $_POST['party_field'] = $fileTypeModel->columnKey($lineModel->partyField);
+        $_POST['doc_field'] = $fileTypeModel->columnKey($lineModel->docField);
+        
         start_form();
 
         start_outer_table(TABLESTYLE2, "width='70%'");
@@ -50,7 +53,7 @@ class ImportLineView
         table_section(2);
         display_heading(_('Contra-Party'));
 
-        $control = View::combo('party_field', Column::names($fileTypeModel->columns));
+        $control = View::combo('party_field', $fileTypeModel->columns);
         label_row(_('Field Name:'), $control);
         text_row(_('Matching:'), 'party_match', $lineModel->partyMatch, 30, 128);
         // $_POST['party_type'] = 'supplier';
@@ -60,6 +63,8 @@ class ImportLineView
             radio('Quick Entry', 'party_type', ImportLineModel::PT_QUICK, null, true) .
             radio('Transfer', 'party_type', ImportLineModel::PT_TRANSFER, null, true)
         );
+
+        label_row(_('Party Code:'), $lineModel->partyCode);
 
         if ($_POST['party_type'] == ImportLineModel::PT_CUSTOMER) {
             customer_list_row(_('Customer:'), 'party_id');
@@ -75,16 +80,17 @@ class ImportLineView
         
         table_section(3);
         display_heading(_('Document'));
-        $control = View::combo('doc_field', Column::names($fileTypeModel->columns));
+        $control = View::combo('doc_field', $fileTypeModel->columns);
         label_row(_('Field Name:'), $control);
         text_row(_('Matching:'), 'doc_match', get_post('doc_match'), 30, 128);
         label_row(_('Document Type:'),
             radio('None', 'doc_type', 'none', null, true) .
             radio('Supplier Invoice', 'doc_type', 'supplier_invoice', null, true)
         );
+        label_row(_('Document Code:'), $lineModel->docCode);
         // if ($lineModel->docType == ImportLineModel::DT_SUPPLIER_INVOICE) {
         // Note: The control below is hard-coded to be named 'item_id'
-        $_POST['stock_id'] = $_POST['doc_item_id'];
+        $_POST['stock_id'] = $lineModel->docCode;
         // label_row(_('Item:'), sales_items_list('item_id', null, false, false, '', array(
         //     'cells' => true,
         //     'where'=>array("NOT no_purchase")

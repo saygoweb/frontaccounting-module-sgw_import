@@ -61,6 +61,8 @@ class ImportFileView
             }
             $header[] = $column->name;
         }
+        $header[] = 'Type';
+        $header[] = 'Code';
         $header[] = ''; // Button
 
         table_header($header);
@@ -79,16 +81,17 @@ class ImportFileView
      * @param Row $row
      * @param int
      */
-    public function tableRow(Row $row, array $columns, &$k)
+    public function tableRow(Row $row, /** @var ImportLineModel */$matchingLine, array $columns, &$k)
     {
         alt_table_row_color($k);
 
-        if ($row->lineId !== null) {
+        if ($matchingLine !== null) {
             check_cells('', 's_' . $row->rowIndex);
         } else {
             label_cell('');
         }
         label_cell($row->rowIndex);
+        // Columns
         $c = count($columns);
         for ($i = 0; $i < $c; $i++) {
             if ($columns[$i]->hidden) {
@@ -96,10 +99,15 @@ class ImportFileView
             }
             label_cell($row->data[$i]);
         }
-        if ($row->lineId !== null) {
-            hyperlink_params_td('import_line.php', 'Edit Line', 'id=' . $row->lineId);
-        } else {
+        // Line details
+        if (!$matchingLine) {
+            label_cell('');
+            label_cell('');
             label_cell(navi_button('a_' . $row->rowIndex, _('Add Line'), true, ICON_ADD));
+        } else {
+            label_cell($matchingLine->partyType);
+            label_cell($matchingLine->partyCode);
+            hyperlink_params_td('import_line.php', 'Edit Line', 'id=' . $row->lineId);
         }
 
         end_row();

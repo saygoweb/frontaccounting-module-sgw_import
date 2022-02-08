@@ -95,8 +95,8 @@ class ImportFile
                 $key = 's_' . $row->rowIndex;
                 $_POST[$key] = $this->force;
             }
-            $row->lineId = $lines->partyLineId($row);
-            $this->view->tableRow($row, $columns, $k);
+            $matchingLine = $lines->matchingLine($row);
+            $this->view->tableRow($row, $matchingLine, $columns, $k);
         }
     }
 

@@ -7,6 +7,7 @@ use SGW_Import\Import\CsvFile;
 use SGW_Import\Import\Lines;
 use SGW_Import\Model\ImportFileTypeModel;
 use SGW_Import\Model\ImportLineModel;
+use SGW_Import\Model\PartyCodeModel;
 
 class ImportLine
 {
@@ -15,15 +16,6 @@ class ImportLine
      * @var \ImportLineView
      */
     private $view;
-
-    /** @var CsvFile */
-    private $file;
-
-    const FORCE_NO    = 'no';
-    const FORCE_CHECK = '1';
-    const FORCE_CLEAR = '0';
-
-    private $force;
 
     private $id;
 
@@ -49,8 +41,10 @@ class ImportLine
         }
 
         if (isset($_POST['id'])) {
-            $_POST['doc_item_id'] = $_POST['stock_id'];
-            Mapper::writeModel($_POST, $lineModel, ['partyCode']);
+            $_POST['doc_code'] = $_POST['stock_id'];
+            Mapper::writeModel($_POST, $lineModel, ['partyCode', 'partyField', 'docField']);
+            $lineModel->partyField = $fileTypeModel->columns[get_post('party_field')];
+            $lineModel->docField = $fileTypeModel->columns[get_post('doc_field')];
         }
 
         if (list_updated('party_type') || list_updated('doc_type')) {
@@ -59,6 +53,7 @@ class ImportLine
             $lineModel->docType = get_post('doc_type');
         } elseif (get_post('UPDATE_ITEM')) {
             $Ajax->activate('_page_body');
+            $lineModel->partyCode = $this->partyCode($lineModel->partyType, $lineModel->partyId);
             $lineModel->write();
         } elseif (get_post('RESET')) {
             $Ajax->activate('_page_body');
@@ -68,6 +63,31 @@ class ImportLine
 
         $lineModel->fixDefaults();
         $this->view->view($lineModel, $fileTypeModel);
+    }
+
+    public function partyCode(string $partyType, $partyId)
+    {
+        $partyCode = null;
+        switch ($partyType) {
+            case ImportLineModel::PT_CUSTOMER:
+                $partyCode = PartyCodeModel::findByCustomer($partyId);
+                break;
+            case ImportLineModel::PT_SUPPLIER:
+                $partyCode = PartyCodeModel::findBySupplier($partyId);
+                break;
+            case ImportLineModel::PT_QUICK:
+                $partyCode = PartyCodeModel::findByQuick($partyId);
+                break;
+            case ImportLineModel::PT_TRANSFER:
+                $partyCode = PartyCodeModel::findByBank($partyId);
+                break;
+            default:
+                throw new \Exception('Unsupported Party Type: ' . $partyType);
+        }
+        if (!$partyCode) {
+            throw new \Exception(sprintf('Could not find Party Code for Party Type %s id %s', $partyType, $partyId));
+        }
+        return $partyCode->code;
     }
 
 }

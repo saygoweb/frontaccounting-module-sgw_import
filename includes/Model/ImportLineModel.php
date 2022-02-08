@@ -84,9 +84,9 @@ class ImportLineModel extends Model
     public $docMatch;
 
     /** @var string */
-    public $docType;
+    public $docCode;
 
-    /** @var int */
-    public $docItemId;
+    /** @var string */
+    public $docType;
 
 }
