@@ -4,7 +4,10 @@ namespace SGW_Import\Controller;
 
 use SGW_Import\Import\Column;
 use SGW_Import\Import\CsvFile;
+use SGW_Import\Import\Importers\Importer;
 use SGW_Import\Import\Lines;
+use SGW_Import\Import\Row;
+use SGW_Import\Import\RowStatus;
 use SGW_Import\Model\ImportFileTypeModel;
 use SGW_Import\Model\ImportLineModel;
 
@@ -31,6 +34,7 @@ class ImportFile
     public function __construct($view)
     {
         $this->view = $view;
+        $this->force = self::FORCE_NO;
     }
 
     public function run()
@@ -61,6 +65,7 @@ class ImportFile
         // if (isset($_GET['delete']) && $_GET['delete']) {
         $this->file = new CsvFile($this->id);
         $this->fileType = ImportFileTypeModel::findByBankId($this->file->importFileModel->bankId);
+        $this->lines = new Lines($this->file->importFileModel->bankId);
         if ($idAddLine) {
             $Ajax->activate('_page_body');
             $row = $this->file->readRow($idAddLine);
@@ -88,15 +93,42 @@ class ImportFile
 
     public function table($columns)
     {
+        global $Ajax;
         $k = 0;
-        $lines = new Lines($this->file->importFileModel->bankId);
+        $doImport = get_post('submit_import');
+        $countImport = 0;
+        if ($doImport) {
+            $Ajax->activate('_page_body');
+        }
         while ($row = $this->file->read()) {
+            $key = 's_' . $row->rowIndex;
             if ($this->force != self::FORCE_NO) {
-                $key = 's_' . $row->rowIndex;
                 $_POST[$key] = $this->force;
             }
-            $matchingLine = $lines->matchingLine($row);
-            $this->view->tableRow($row, $matchingLine, $columns, $k);
+            $matchingLine = $this->lines->matchingLine($row);
+            if ($doImport) {
+                $row->status = new RowStatus();
+            }
+            if ($doImport && isset($_POST[$key]) && $_POST[$key]) {
+                $countImport++;
+                $this->importLine($row, $matchingLine);
+            }
+            $this->view->tableRow($row, $matchingLine, $columns, $doImport, $k);
+        }
+        if ($doImport && $countImport == 0) {
+            display_error('No lines selected for import.');
+        }
+    }
+
+    public function importLine(Row $row, ImportLineModel $line)
+    {
+        $importer = Importer::fromPartyType($line->partyType);
+        if (!$importer->transactionExists($row, $line, $this->fileType)) {
+            if (get_post('dry_run')) {
+                $row->status->status = RowStatus::STATUS_TODO;
+            } else {
+                $importer->addTransaction($row, $line, $this->fileType);
+            }
         }
     }
 

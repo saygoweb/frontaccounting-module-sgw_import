@@ -17,6 +17,7 @@ use SGW_Import\Import\Column;
 use SGW_Import\Import\CsvFile;
 use SGW_Import\Import\Row;
 use SGW_Import\Model\ImportFileTypeModel;
+use SGW_Import\Model\ImportLineModel;
 
 $page_security = 'SA_SGW_IMPORT_FILE';
 
@@ -26,6 +27,10 @@ $path_to_module = __DIR__;
 include_once($path_to_root . "/includes/session.inc");
 include_once($path_to_root . "/includes/ui.inc");
 include_once($path_to_root . "/includes/ui/db_pager_view.inc");
+include_once($path_to_root . '/includes/ui/items_cart.inc');
+include_once($path_to_root . '/purchasing/includes/po_class.inc');
+include_once($path_to_root . "/includes/ui/allocation_cart.inc");
+
 
 class ImportFileView
 {
@@ -42,8 +47,9 @@ class ImportFileView
         start_table(TABLESTYLE_NOBORDER);
         start_row();
 
-        check_cells('Show All', 'show_all', null, true);
-        submit_cells('RunDataImport', _("Import Data"), '', _('Select lines'), 'default');
+        // check_cells('Show All', 'show_all', null, true);
+        check_cells('Dry Run', 'dry_run', null, false);
+        submit_cells('submit_import', _("Import Data"), '', _('Select lines'), 'default');
 
         end_row();
         end_table(1);
@@ -63,6 +69,8 @@ class ImportFileView
         }
         $header[] = 'Type';
         $header[] = 'Code';
+        $header[] = 'Status';
+        $header[] = 'Transaction';
         $header[] = ''; // Button
 
         table_header($header);
@@ -81,7 +89,7 @@ class ImportFileView
      * @param Row $row
      * @param int
      */
-    public function tableRow(Row $row, /** @var ImportLineModel */$matchingLine, array $columns, &$k)
+    public function tableRow(Row $row, /** @var ImportLineModel */$matchingLine, array $columns, bool $doImport, &$k)
     {
         alt_table_row_color($k);
 
@@ -103,21 +111,25 @@ class ImportFileView
         if (!$matchingLine) {
             label_cell('');
             label_cell('');
+            label_cell('');
+            label_cell('');
             label_cell(navi_button('a_' . $row->rowIndex, _('Add Line'), true, ICON_ADD));
         } else {
             label_cell($matchingLine->partyType);
             label_cell($matchingLine->partyCode);
-            hyperlink_params_td('import_line.php', 'Edit Line', 'id=' . $row->lineId);
+            if (!$doImport) {
+                label_cell('');
+                label_cell('');
+            } else {
+                label_cell($row->status->status);
+                label_cell(viewer_link($row->status->documentId, $row->status->link));
+            }
+            hyperlink_params_td('import_line.php', 'Edit Line', 'id=' . $matchingLine->id);
         }
 
         end_row();
     }
 
-    public function generatedInvoice($orderNo)
-    {
-        echo 'Generated invoice for order ' . $orderNo;
-        echo '<br/>';
-    }
 }
 
 add_access_extensions();

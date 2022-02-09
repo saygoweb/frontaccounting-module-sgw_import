@@ -5,6 +5,14 @@ class Row
 {
     public $data = [];
 
+    /** @var int */
     public $rowIndex = 0;
-    public $lineId = null;
+
+    /** @var RowStatus */
+    public $status;
+
+    public function __construct()
+    {
+        $this->status = new RowStatus();
+    }
 }

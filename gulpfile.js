@@ -119,7 +119,7 @@ gulp.task('db-backup', function(cb) {
     password : process.env.password_db
   };
   execute(
-    'mysqldump -u cambell --password=<%= password %> saygoweb_fa | gzip > backup/current.sql.gz',
+    'mysqldump -u cambell --password=<%= password %> fa_saygoweb | gzip > backup/current.sql.gz',
     options,
     cb
   );
@@ -134,7 +134,7 @@ gulp.task('db-restore', function(cb) {
     password : process.env.password_db
   };
   execute(
-    'gunzip -c backup/current.sql.gz | mysql -u cambell --password=<%= password %> -D saygoweb_fa',
+    'gunzip -c backup/current.sql.gz | mysql -u cambell --password=<%= password %> -D fa_saygoweb',
     options,
     cb
   );
@@ -144,12 +144,13 @@ gulp.task('db-copy', function(cb) {
   var options = {
     dryRun : false,
     silent : false,
-    dest : "root@bms.saygoweb.com",
-    key : "~/.ssh/dev_rsa",
-    password : process.env.password_db
+    dest : "cambell@saygoweb.com",
+    key : "~/.ssh/id_rsa",
+    password_remote : process.env.password_saygoweb_fa,
+    password_local : process.env.password_db
   };
   execute(
-    'ssh -C -i <%= key %> <%= dest %> mysqldump -u cambell --password=<%= password %> saygoweb_fa | mysql -u cambell --password=<%= password %> -D saygoweb_fa',
+    'ssh -C -i <%= key %> <%= dest %> mysqldump -u cambell --password=<%= password_remote %> saygoweb_fa | mysql -u cambell --password=<%= password_local %> -D fa_saygoweb',
     options,
     cb
   );
