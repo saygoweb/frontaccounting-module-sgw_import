@@ -12,7 +12,8 @@ class SupplierImporter extends Importer
     public function transactionExists(Row $row, ImportLineModel $line)
     {
         $bankId = $this->fileType->bankId;
-        $transactions = TransactionModel::fromBankTransaction($row->data[$this->dateColumn], $row->data[$this->amountColumn], $bankId, ST_SUPPAYMENT);
+        $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
+        $transactions = TransactionModel::fromBankTransaction($sqlDate, $row->data[$this->amountColumn], $bankId, ST_SUPPAYMENT);
         $c = 0;
         $t = [];
         foreach ($transactions as $transaction) {

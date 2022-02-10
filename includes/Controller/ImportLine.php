@@ -51,7 +51,13 @@ class ImportLine
             $Ajax->activate('_page_body');
             $lineModel->partyType = get_post('party_type');
             $lineModel->docType = get_post('doc_type');
-        } elseif (get_post('UPDATE_ITEM')) {
+        }
+        if (isset($_POST['id'])) {
+            if ($lineModel->docType == ImportLineModel::DT_NONE || $lineModel->docType == ImportLineModel::DT_CUSTOMER_INVOICE) {
+                $lineModel->docCode = '';
+            }
+        }
+        if (get_post('UPDATE_ITEM')) {
             $Ajax->activate('_page_body');
             $lineModel->partyCode = $this->partyCode($lineModel->partyType, $lineModel->partyId);
             $lineModel->write();

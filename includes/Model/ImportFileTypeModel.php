@@ -9,6 +9,10 @@ use SGW\DB;
 
 class ImportFileTypeModel extends Model
 {
+
+    const DTF_YYYYMMDD = 'yyyymmdd';
+    const DTF_DDMMYY   = 'ddmmyy';
+
     public function __construct()
     {
         $pdo = Anorm::pdo();
@@ -32,6 +36,7 @@ class ImportFileTypeModel extends Model
         );
         $this->columns = [];
         $this->hide = [];
+        $this->dateFormat = self::DTF_YYYYMMDD;
     }
 
     /** @return ImportFileTypeModel | null */
@@ -78,6 +83,9 @@ class ImportFileTypeModel extends Model
 
     /** @var string */
     public $dateField;
+
+    /** @var string */
+    public $dateFormat;
 
     /** @var string */
     public $amountField;

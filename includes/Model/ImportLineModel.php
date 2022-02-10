@@ -16,6 +16,7 @@ class ImportLineModel extends Model
 
     const DT_NONE = 'none';
     const DT_SUPPLIER_INVOICE = 'supplier_invoice';
+    const DT_CUSTOMER_INVOICE = 'customer_invoice';
 
     public function __construct()
     {

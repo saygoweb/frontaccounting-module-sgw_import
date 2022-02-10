@@ -56,6 +56,8 @@ class AdminFileTypeView
         text_row(_('Hidden:'), 'hide', $this->controller->hide($fileTypeModel), 50, 128);
         $dateCombo = View::combo('date_field', $fileTypeModel->columns);
         label_row(_('Date Field:'), $dateCombo);
+        $dateFormatCombo = View::combo('date_format', $this->controller->dateFormatOptions());
+        label_row(_('Date Format:'), $dateFormatCombo);
         $amountCombo = View::combo('amount_field', $fileTypeModel->columns);
         label_row(_('Amount Field:'), $amountCombo);
 

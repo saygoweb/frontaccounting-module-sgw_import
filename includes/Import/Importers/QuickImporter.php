@@ -12,7 +12,8 @@ class QuickImporter extends Importer
     public function transactionExists(Row $row, ImportLineModel $line)
     {
         $bankId = $this->fileType->bankId;
-        $transactions = TransactionModel::fromBankTransaction($row->data[$this->dateColumn], $row->data[$this->amountColumn], $bankId, ST_BANKPAYMENT);
+        $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
+        $transactions = TransactionModel::fromBankTransaction($sqlDate, $row->data[$this->amountColumn], $bankId, ST_BANKPAYMENT);
         $c = 0;
         $t = [];
         foreach ($transactions as $transaction) {

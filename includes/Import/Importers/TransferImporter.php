@@ -11,7 +11,8 @@ class TransferImporter extends Importer
     public function transactionExists(Row $row, ImportLineModel $line)
     {
         $bankId = $this->fileType->bankId;
-        $transactions = TransactionModel::fromBankTransfer($row->data[$this->dateColumn], $row->data[$this->amountColumn], $line->partyId, $bankId);
+        $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
+        $transactions = TransactionModel::fromBankTransfer($sqlDate, $row->data[$this->amountColumn], $line->partyId, $bankId);
         $c = 0;
         $t = [];
         foreach ($transactions as $transaction) {

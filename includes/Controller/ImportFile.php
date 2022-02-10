@@ -65,7 +65,6 @@ class ImportFile
         // if (isset($_GET['delete']) && $_GET['delete']) {
         $this->file = new CsvFile($this->id);
         $this->fileType = ImportFileTypeModel::findByBankId($this->file->importFileModel->bankId);
-        $this->lines = new Lines($this->file->importFileModel->bankId);
         if ($idAddLine) {
             $Ajax->activate('_page_body');
             $row = $this->file->readRow($idAddLine);
@@ -78,6 +77,7 @@ class ImportFile
             $this->file->reset();
         }
 
+        $this->lines = new Lines($this->file->importFileModel->bankId);
         $this->columns = Column::createByArray($this->fileType->columns, $this->fileType->hide);
         $this->view->viewList($this->file, $this->columns);
         $this->file->close();

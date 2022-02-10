@@ -85,7 +85,8 @@ class ImportLineView
         text_row(_('Matching:'), 'doc_match', get_post('doc_match'), 30, 128);
         label_row(_('Document Type:'),
             radio('None', 'doc_type', 'none', null, true) .
-            radio('Supplier Invoice', 'doc_type', 'supplier_invoice', null, true)
+            radio('Supplier Invoice', 'doc_type', 'supplier_invoice', null, true) .
+            radio('Customer Invoice', 'doc_type', 'customer_invoice', null, true)
         );
         label_row(_('Document Code:'), $lineModel->docCode);
         // if ($lineModel->docType == ImportLineModel::DT_SUPPLIER_INVOICE) {

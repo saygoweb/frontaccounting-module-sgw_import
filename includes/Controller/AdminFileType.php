@@ -35,6 +35,7 @@ class AdminFileType
             $fileTypeModel->readOrThrow($id);
             $fileTypeModel->hide = explode(',', $_POST['hide']);
             $fileTypeModel->dateField = $fileTypeModel->columns[get_post('date_field')];
+            $fileTypeModel->dateFormat = get_post('date_format'); // This is the only one that's "normal" and we don't bother with the Mapper::...
             $fileTypeModel->amountField = $fileTypeModel->columns[get_post('amount_field')];
             if (get_post('UPDATE_ITEM')) {
                 $fileTypeModel->write();
@@ -55,7 +56,15 @@ class AdminFileType
 
     public function hide(ImportFileTypeModel $fileTypeModel)
     {
-        return implode($fileTypeModel->hide);
+        return implode(',', $fileTypeModel->hide);
+    }
+
+    public function dateFormatOptions()
+    {
+        return [
+            ImportFileTypeModel::DTF_YYYYMMDD => 'YYYY-MM-DD',
+            ImportFileTypeModel::DTF_DDMMYY => 'DD/MM/YY'
+        ];
     }
 
     public function linesTable($bankId)

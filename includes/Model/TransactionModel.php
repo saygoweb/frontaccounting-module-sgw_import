@@ -45,6 +45,41 @@ class TransactionModel extends Model
         return $result;
     }
 
+    public static function fromBankPaymentAndInvoice($date, $amount, $account, $invoiceRef)
+    {
+        $fromType = ST_CUSTPAYMENT;
+        $bank_trans = DB::prefix('bank_trans');
+        $cust_allocations = DB::prefix('cust_allocations');
+        $debtor_trans = DB::prefix('debtor_trans');
+        $result = DataMapper::find(TransactionModel::class, Anorm::pdo())
+            ->select('bt.trans_no AS number,ref,bt.trans_date AS date,bt.amount,bt.type')
+            ->from("$bank_trans AS bt")
+            ->join("INNER JOIN $cust_allocations AS ca ON bt.type=ca.trans_type_from AND bt.trans_no=ca.trans_no_from")
+            ->join("INNER JOIN $debtor_trans AS dt ON ca.trans_type_to=dt.type AND ca.trans_no_to=dt.trans_no")
+            ->where(
+                'bt.trans_date=:date AND bt.amount=:amount AND bt.bank_act=:account AND dt.reference=:invoiceRef',
+                [':date' => $date, ':amount' => $amount, ':account' => $account, ':invoiceRef' => $invoiceRef]
+            )
+            ->some();
+        return $result;
+    }
+
+    public static function fromBankPaymentAndPartyId($date, $amount, $account, $partyId)
+    {
+        $bank_trans = DB::prefix('bank_trans');
+        $cust_allocations = DB::prefix('cust_allocations');
+        $result = DataMapper::find(TransactionModel::class, Anorm::pdo())
+            ->select('bt.trans_no AS number,ref,bt.trans_date AS date,bt.amount,bt.type')
+            ->from("$bank_trans AS bt")
+            ->join("INNER JOIN $cust_allocations AS ca ON bt.type=ca.trans_type_from AND bt.trans_no=ca.trans_no_from")
+            ->where(
+                'bt.trans_date=:date AND bt.amount=:amount AND bt.bank_act=:account AND ca.person_id=:partyId',
+                [':date' => $date, ':amount' => $amount, ':account' => $account, ':partyId' => $partyId]
+            )
+            ->some();
+        return $result;
+    }
+
     /** @var int */
     public $number;
 
