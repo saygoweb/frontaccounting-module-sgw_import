@@ -9,9 +9,9 @@ use SGW_Import\Model\TransactionModel;
 
 class SupplierImporter extends Importer
 {
-    public function transactionExists(Row $row, ImportLineModel $line, ImportFileTypeModel $fileType)
+    public function transactionExists(Row $row, ImportLineModel $line)
     {
-        $bankId = $fileType->bankId;
+        $bankId = $this->fileType->bankId;
         $transactions = TransactionModel::fromBankTransaction($row->data[$this->dateColumn], $row->data[$this->amountColumn], $bankId, ST_SUPPAYMENT);
         $c = 0;
         $t = [];
@@ -29,7 +29,7 @@ class SupplierImporter extends Importer
         return $c == 1;
     }
 
-    public function addTransaction(Row $row, ImportLineModel $line, ImportFileTypeModel $fileType)
+    public function addTransaction(Row $row, ImportLineModel $line)
     {
         global $Refs;
 
@@ -59,7 +59,7 @@ class SupplierImporter extends Importer
             null // Review CP 2022-02
         );
         $paymentNumber = write_supp_payment(
-            0, $line->partyId, $fileType->bankId, $faDate, $paymentRef,
+            0, $line->partyId, $this->fileType->bankId, $faDate, $paymentRef,
             $amount, 0.0, $line->partyMatch, 0, 0
         );
 

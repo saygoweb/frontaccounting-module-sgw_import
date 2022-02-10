@@ -3,15 +3,14 @@ namespace SGW_Import\Import\Importers;
 
 use SGW_Import\Import\Row;
 use SGW_Import\Import\RowStatus;
-use SGW_Import\Model\ImportFileTypeModel;
 use SGW_Import\Model\ImportLineModel;
 use SGW_Import\Model\TransactionModel;
 
 class TransferImporter extends Importer
 {
-    public function transactionExists(Row $row, ImportLineModel $line, ImportFileTypeModel $fileType)
+    public function transactionExists(Row $row, ImportLineModel $line)
     {
-        $bankId = $fileType->bankId;
+        $bankId = $this->fileType->bankId;
         $transactions = TransactionModel::fromBankTransfer($row->data[$this->dateColumn], $row->data[$this->amountColumn], $line->partyId, $bankId);
         $c = 0;
         $t = [];
@@ -34,7 +33,7 @@ class TransferImporter extends Importer
         return $c == 2;
     }
 
-    public function addTransaction(Row $row, ImportLineModel $line, ImportFileTypeModel $fileType)
+    public function addTransaction(Row $row, ImportLineModel $line)
     {
 
     }

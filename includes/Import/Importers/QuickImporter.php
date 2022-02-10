@@ -9,9 +9,9 @@ use SGW_Import\Model\TransactionModel;
 
 class QuickImporter extends Importer
 {
-    public function transactionExists(Row $row, ImportLineModel $line, ImportFileTypeModel $fileType)
+    public function transactionExists(Row $row, ImportLineModel $line)
     {
-        $bankId = $fileType->bankId;
+        $bankId = $this->fileType->bankId;
         $transactions = TransactionModel::fromBankTransaction($row->data[$this->dateColumn], $row->data[$this->amountColumn], $bankId, ST_BANKPAYMENT);
         $c = 0;
         $t = [];
@@ -30,7 +30,7 @@ class QuickImporter extends Importer
         return $c == 1;
     }
 
-    public function addTransaction(Row $row, ImportLineModel $line, ImportFileTypeModel $fileType)
+    public function addTransaction(Row $row, ImportLineModel $line)
     {
         global $Refs;
         $faDate = sql2date($row->data[$this->dateColumn]);
@@ -52,7 +52,7 @@ class QuickImporter extends Importer
         }
 
         $trans = write_bank_transaction(
-            $cart->trans_type, $cart->order_id, $fileType->bankId, $cart, $cart->tran_date,
+            $cart->trans_type, $cart->order_id, $this->fileType->bankId, $cart, $cart->tran_date,
             4, $line->partyId, '',
             $cart->reference,$line->partyMatch,
             true, null // Note that gl_db_banking L401 has a bogus test for 11 args so use full args here. CP 2022-02

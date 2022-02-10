@@ -122,12 +122,12 @@ class ImportFile
 
     public function importLine(Row $row, ImportLineModel $line)
     {
-        $importer = Importer::fromPartyType($line->partyType);
-        if (!$importer->transactionExists($row, $line, $this->fileType)) {
+        $importer = Importer::fromPartyType($line->partyType, $this->fileType);
+        if (!$importer->transactionExists($row, $line)) {
             if (get_post('dry_run')) {
                 $row->status->status = RowStatus::STATUS_TODO;
             } else {
-                $importer->addTransaction($row, $line, $this->fileType);
+                $importer->addTransaction($row, $line);
             }
         }
     }
