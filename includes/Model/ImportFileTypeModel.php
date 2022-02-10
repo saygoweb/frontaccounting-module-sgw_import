@@ -39,7 +39,7 @@ class ImportFileTypeModel extends Model
     {
         $result = DataMapper::find(ImportFileTypeModel::class, Anorm::pdo())
             ->where('bank_id=:bankId', [ ':bankId' => $bankId])
-            ->oneOrThrow();
+            ->one();
         return $result;
     }
 
