@@ -76,6 +76,12 @@ class ImportFileTypeModel extends Model
     /** @var int */
     public $bankId;
 
+    /** @var string */
+    public $dateField;
+
+    /** @var string */
+    public $amountField;
+
     /** @var string[] */
     public $columns;
 

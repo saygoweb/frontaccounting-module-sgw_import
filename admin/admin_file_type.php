@@ -38,6 +38,9 @@ class AdminFileTypeView
     public function view(ImportFileTypeModel $fileTypeModel)
     {
         Mapper::writeArray($fileTypeModel, $_POST);
+        $_POST['date_field'] = $fileTypeModel->columnKey($fileTypeModel->dateField);
+        $_POST['amount_field'] = $fileTypeModel->columnKey($fileTypeModel->amountField);
+
         start_form();
 
         start_table(TABLESTYLE_NOBORDER);
@@ -51,6 +54,10 @@ class AdminFileTypeView
         table_section(1);
         label_row(_('Columns:'), $this->controller->columns($fileTypeModel));
         text_row(_('Hidden:'), 'hide', $this->controller->hide($fileTypeModel), 50, 128);
+        $dateCombo = View::combo('date_field', $fileTypeModel->columns);
+        label_row(_('Date Field:'), $dateCombo);
+        $amountCombo = View::combo('amount_field', $fileTypeModel->columns);
+        label_row(_('Amount Field:'), $amountCombo);
 
         // table_section(2);
 

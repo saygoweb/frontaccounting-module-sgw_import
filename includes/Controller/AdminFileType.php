@@ -34,6 +34,8 @@ class AdminFileType
             $fileTypeModel = new ImportFileTypeModel();
             $fileTypeModel->readOrThrow($id);
             $fileTypeModel->hide = explode(',', $_POST['hide']);
+            $fileTypeModel->dateField = $fileTypeModel->columns[get_post('date_field')];
+            $fileTypeModel->amountField = $fileTypeModel->columns[get_post('amount_field')];
             if (get_post('UPDATE_ITEM')) {
                 $fileTypeModel->write();
             } elseif (get_post('RESET')) {
