@@ -34,7 +34,8 @@ class SupplierImporter extends Importer
     {
         global $Refs;
 
-        $faDate = sql2date($row->data[$this->dateColumn]);
+        $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
+        $faDate = sql2date($sqlDate);
 
         $cart = new \purch_order;
         $cart->trans_type = ST_SUPPINVOICE;

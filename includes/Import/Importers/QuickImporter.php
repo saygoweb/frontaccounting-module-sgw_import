@@ -34,7 +34,8 @@ class QuickImporter extends Importer
     public function addTransaction(Row $row, ImportLineModel $line)
     {
         global $Refs;
-        $faDate = sql2date($row->data[$this->dateColumn]);
+        $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
+        $faDate = sql2date($sqlDate);
         $cart = new \items_cart(ST_BANKPAYMENT);
         $cart->order_id = 0; // Will be set in write_bank_transaction
         $cart->tran_date = $faDate;
