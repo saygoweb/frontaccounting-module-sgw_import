@@ -47,7 +47,7 @@ abstract class Importer
                 $d = \DateTime::createFromFormat('d/m/y', $data);
                 return $d->format('Y-m-d');
             default:
-                throw new \Exception(sprintf("Unsupported data format '%s'", $this->fileType->dateFormat));
+                throw new \Exception(sprintf("Unsupported date format '%s'", $this->fileType->dateFormat));
         }
     }
 
