@@ -52,6 +52,9 @@ class SupplierImporter extends Importer
         $amount = (float)$row->data[$this->amountColumn];
         $amount = -$amount; // Positive amounts needed for payments
         $c = count($cart->line_items);
+        if (!$line->docCode) {
+            throw new \Exception(sprintf("No Document Code for supplier in line '%s'", $line->partyMatch));
+        }
         $cart->add_to_order($c, $line->docCode, 1, null, $amount, null, '', 0, 0);
         $transNumber = add_direct_supp_trans($cart);
 
