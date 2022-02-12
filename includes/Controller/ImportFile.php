@@ -5,6 +5,7 @@ namespace SGW_Import\Controller;
 use SGW_Import\Import\Column;
 use SGW_Import\Import\CsvFile;
 use SGW_Import\Import\Importers\Importer;
+use SGW_Import\Import\Importers\ImportState;
 use SGW_Import\Import\Lines;
 use SGW_Import\Import\Row;
 use SGW_Import\Import\RowStatus;
@@ -100,6 +101,7 @@ class ImportFile
         if ($doImport) {
             $Ajax->activate('_page_body');
         }
+        $importState = new ImportState();
         while ($row = $this->file->read()) {
             $key = 's_' . $row->rowIndex;
             if ($this->force != self::FORCE_NO) {
@@ -111,7 +113,7 @@ class ImportFile
             }
             if ($doImport && isset($_POST[$key]) && $_POST[$key]) {
                 $countImport++;
-                $this->importLine($row, $matchingLine);
+                $this->importLine($row, $matchingLine, $importState);
             }
             $this->view->tableRow($row, $matchingLine, $columns, $doImport, $k);
         }
@@ -120,9 +122,9 @@ class ImportFile
         }
     }
 
-    public function importLine(Row $row, ImportLineModel $line)
+    public function importLine(Row $row, ImportLineModel $line, ImportState $importState)
     {
-        $importer = Importer::fromPartyType($line->partyType, $this->fileType);
+        $importer = Importer::fromPartyType($line->partyType, $this->fileType, $importState);
         if (!$importer->transactionExists($row, $line)) {
             if (get_post('dry_run')) {
                 $row->status->status = RowStatus::STATUS_TODO;

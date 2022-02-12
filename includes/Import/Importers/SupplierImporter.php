@@ -3,7 +3,6 @@ namespace SGW_Import\Import\Importers;
 
 use SGW_Import\Import\Row;
 use SGW_Import\Import\RowStatus;
-use SGW_Import\Model\ImportFileTypeModel;
 use SGW_Import\Model\ImportLineModel;
 use SGW_Import\Model\TransactionModel;
 
@@ -13,21 +12,21 @@ class SupplierImporter extends Importer
     {
         $bankId = $this->fileType->bankId;
         $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
-        $transactions = TransactionModel::fromBankTransaction($sqlDate, $row->data[$this->amountColumn], $bankId, ST_SUPPAYMENT);
+        $amount = $row->data[$this->amountColumn];
+        $transactions = TransactionModel::fromBankTransaction($sqlDate, $amount, $bankId, ST_SUPPAYMENT);
         $c = 0;
-        $t = [];
         foreach ($transactions as $transaction) {
-            $t[] = clone $transaction;
+            if (!$this->importState->isUsed($sqlDate, $line->partyCode, $amount, $transaction->number)) {
+                $row->status->status = RowStatus::STATUS_EXISTING;
+                $row->status->documentType = $transaction->type;
+                $row->status->documentId = $transaction->number;
+                $row->status->link = 'purchasing/view/view_supp_payment.php?trans_no=' . $row->status->documentId;
+                $this->importState->pushPartyAmount($sqlDate, $line->partyCode, $amount, $row->status->documentId);
+                return true;
+            }
             $c++;
         }
-        // Status
-        if ($c == 1) {
-            $row->status->status = RowStatus::STATUS_EXISTING;
-            $row->status->documentType = $t[0]->type;
-            $row->status->documentId = $t[0]->number;
-            $row->status->link = 'purchasing/view/view_supp_payment.php?trans_no=' . $row->status->documentId;
-        }
-        return $c == 1;
+        return false;
     }
 
     public function addTransaction(Row $row, ImportLineModel $line)
@@ -50,12 +49,12 @@ class SupplierImporter extends Importer
         );
 
         $amount = (float)$row->data[$this->amountColumn];
-        $amount = -$amount; // Positive amounts needed for payments
+        $paymentAmount = -$amount; // Positive amounts needed for payments
         $c = count($cart->line_items);
         if (!$line->docCode) {
             throw new \Exception(sprintf("No Document Code for supplier in line '%s'", $line->partyMatch));
         }
-        $cart->add_to_order($c, $line->docCode, 1, null, $amount, null, '', 0, 0);
+        $cart->add_to_order($c, $line->docCode, 1, null, $paymentAmount, null, '', 0, 0);
         $transNumber = add_direct_supp_trans($cart);
 
         // Payment
@@ -65,18 +64,18 @@ class SupplierImporter extends Importer
         );
         $paymentNumber = write_supp_payment(
             0, $line->partyId, $this->fileType->bankId, $faDate, $paymentRef,
-            $amount, 0.0, $line->partyMatch, 0, 0
+            $paymentAmount, 0.0, $line->partyMatch, 0, 0
         );
 
         // Allocation
         $allocation = new \allocation(ST_SUPPAYMENT, $paymentNumber, $line->partyId);
         $allocation->date_ = $faDate;
-        $allocation->amount = -$amount;
+        $allocation->amount = $amount;
         $allocation->person_type = PT_SUPPLIER;
         $allocation->person_id = $line->partyId;
         $allocation->add_item(
             ST_SUPPINVOICE, $transNumber, $faDate, $faDate,
-            $amount, $amount, $amount, $paymentRef
+            $paymentAmount, $paymentAmount, $paymentAmount, $paymentRef
         );
         $allocation->write();
 
@@ -85,6 +84,9 @@ class SupplierImporter extends Importer
         $row->status->documentId = $paymentNumber;
         $row->status->documentType = ST_SUPPAYMENT;
         $row->status->link = 'purchasing/view/view_supp_payment.php?trans_no=' . $row->status->documentId;
+
+        $this->importState->pushPartyAmount($sqlDate, $line->partyCode, $amount, $row->status->documentId);
+
     }
 
 }

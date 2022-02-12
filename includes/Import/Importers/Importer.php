@@ -7,17 +7,17 @@ use SGW_Import\Model\ImportLineModel;
 
 abstract class Importer
 {
-    public static function fromPartyType($partyType, ImportFileTypeModel $fileType)
+    public static function fromPartyType($partyType, ImportFileTypeModel $fileType, ImportState $importState)
     {
         switch ($partyType) {
             case ImportLineModel::PT_CUSTOMER:
-                return new CustomerImporter($fileType);
+                return new CustomerImporter($fileType, $importState);
             case ImportLineModel::PT_SUPPLIER:
-                return new SupplierImporter($fileType);
+                return new SupplierImporter($fileType, $importState);
             case ImportLineModel::PT_QUICK:
-                return new QuickImporter($fileType);
+                return new QuickImporter($fileType, $importState);
             case ImportLineModel::PT_TRANSFER:
-                return new TransferImporter($fileType);
+                return new TransferImporter($fileType, $importState);
         }
         throw new \Exception("Could not create Importer for '$partyType'");
     }
@@ -28,9 +28,13 @@ abstract class Importer
     /** @var ImportFileTypeModel */
     protected $fileType;
 
-    protected function __construct(ImportFileTypeModel $fileType)
+    /** @var ImportState */
+    protected $importState;
+
+    protected function __construct(ImportFileTypeModel $fileType, ImportState $importState)
     {
         $this->fileType = $fileType;
+        $this->importState = $importState;
         $this->dateColumn = $fileType->columnKey($fileType->dateField);
         $this->amountColumn = $fileType->columnKey($fileType->amountField);
     }
