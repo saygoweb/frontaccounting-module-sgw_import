@@ -31,7 +31,7 @@ class Mapper
                 continue;
             }
             if (!in_array($property, $exclude)) {
-                $c->$property = $data[$field];
+                $c->$property = html_entity_decode($data[$field]);
             }
         }
     }
