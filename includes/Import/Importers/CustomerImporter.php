@@ -12,26 +12,11 @@ class CustomerImporter extends Importer
     {
         $bankId = $this->fileType->bankId;
         $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
-        $transactions = TransactionModel::fromBankTransaction($sqlDate, $row->data[$this->amountColumn], $bankId, ST_CUSTPAYMENT);
-        $c = 0;
-        $t = [];
-        foreach ($transactions as $transaction) {
-            $t[] = clone $transaction;
-            $c++;
-        }
-        // Status
-        if ($c == 1) {
-            $row->status->status = RowStatus::STATUS_EXISTING;
-            $row->status->documentType = $t[0]->type;
-            $row->status->documentId = $t[0]->number;
-            $row->status->link = 'sales/view/view_receipt.php?trans_no=' . $row->status->documentId;
-            // http://localhost:8000/sales/view/view_receipt.php?trans_no=617&trans_type=12
-            return true;
-        } 
+        $amount = $row->data[$this->amountColumn];
         // Try with the invoice ref
         $invoiceRef = $this->docReference($row, $line);
         if ($invoiceRef) {
-            $transactions = TransactionModel::fromBankPaymentAndInvoice($sqlDate, $row->data[$this->amountColumn], $bankId, $invoiceRef);
+            $transactions = TransactionModel::fromBankPaymentAndInvoice($sqlDate, $amount, $bankId, $invoiceRef);
             $t2 = [];
             $c2 = 0;
             foreach ($transactions as $transaction) {
@@ -43,31 +28,24 @@ class CustomerImporter extends Importer
                 $row->status->documentType = $t2[0]->type;
                 $row->status->documentId = $t2[0]->number;
                 $row->status->link = 'sales/view/view_receipt.php?trans_no=' . $row->status->documentId;
+                $this->importState->pushPartyAmount($sqlDate, $line->partyCode, $amount, $row->status->documentId);
                 return true;
             }
         }
-        // Try for a single transaction allocated to this party
-        $transactions = TransactionModel::fromBankPaymentAndPartyId($sqlDate, $row->data[$this->amountColumn], $bankId, $line->partyId);
-        $t3 = [];
-        $c3 = 0;
+        // Try matching the remaining transactions with this party on this date.
+        $transactions = TransactionModel::fromBankTransaction($sqlDate, $amount, $bankId, ST_CUSTPAYMENT);
+        $c = 0;
         foreach ($transactions as $transaction) {
-            $t3[] = clone $transaction;
-            $c3++;
+            if (!$this->importState->isUsed($sqlDate, $line->partyCode, $amount, $transaction->number)) {
+                $row->status->status = RowStatus::STATUS_EXISTING;
+                $row->status->documentType = $transaction->type;
+                $row->status->documentId = $transaction->number;
+                $row->status->link = 'sales/view/view_receipt.php?trans_no=' . $row->status->documentId;
+                $this->importState->pushPartyAmount($sqlDate, $line->partyCode, $amount, $row->status->documentId);
+                return true;
+            }
+            $c++;
         }
-        if ($c3 == 1) {
-            $row->status->status = RowStatus::STATUS_EXISTING;
-            $row->status->documentType = $t3[0]->type;
-            $row->status->documentId = $t3[0]->number;
-            $row->status->link = 'sales/view/view_receipt.php?trans_no=' . $row->status->documentId;
-            return true;
-        }
-        if ($c == 0) {
-            // There was no payment at all on this date so it is TODO
-            $row->status->status = RowStatus::STATUS_TODO;
-            return false;
-        }
-        // c || c2 || c3 > 1 This is uncertain, likely an unallocated customer payment
-        $row->status->status = RowStatus::STATUS_MANUAL;
         return false;
     }
 
