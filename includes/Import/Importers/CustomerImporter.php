@@ -31,6 +31,7 @@ class CustomerImporter extends Importer
                 $this->importState->pushPartyAmount($sqlDate, $line->partyCode, $amount, $row->status->documentId);
                 return true;
             }
+            return false;
         }
         // Try matching the remaining transactions with this party on this date.
         $transactions = TransactionModel::fromBankTransaction($sqlDate, $amount, $bankId, ST_CUSTPAYMENT);
