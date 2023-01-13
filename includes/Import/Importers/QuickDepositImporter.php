@@ -7,13 +7,13 @@ use SGW_Import\Model\ImportFileTypeModel;
 use SGW_Import\Model\ImportLineModel;
 use SGW_Import\Model\TransactionModel;
 
-class QuickImporter extends Importer
+class QuickDepositImporter extends Importer
 {
     public function transactionExists(Row $row, ImportLineModel $line)
     {
         $bankId = $this->fileType->bankId;
         $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
-        $transactions = TransactionModel::fromBankTransaction($sqlDate, $row->data[$this->amountColumn], $bankId, ST_BANKPAYMENT);
+        $transactions = TransactionModel::fromBankTransaction($sqlDate, $row->data[$this->amountColumn], $bankId, ST_BANKDEPOSIT);
         $c = 0;
         $t = [];
         foreach ($transactions as $transaction) {
@@ -25,7 +25,7 @@ class QuickImporter extends Importer
             $row->status->status = RowStatus::STATUS_EXISTING;
             $row->status->documentType = $t[0]->type;
             $row->status->documentId = $t[0]->number;
-            $row->status->link = 'gl/view/gl_payment_view.php?trans_no=' . $row->status->documentId;
+            $row->status->link = 'gl/view/gl_deposit_view.php?trans_no=' . $row->status->documentId;
         }
         
         return $c == 1;
@@ -36,7 +36,7 @@ class QuickImporter extends Importer
         global $Refs;
         $sqlDate = $this->sqlDate($row->data[$this->dateColumn]);
         $faDate = sql2date($sqlDate);
-        $cart = new \items_cart(ST_BANKPAYMENT);
+        $cart = new \items_cart(ST_BANKDEPOSIT);
         $cart->order_id = 0; // Will be set in write_bank_transaction
         $cart->tran_date = $faDate;
         $cart->reference = $Refs->get_next($cart->trans_type, null, $faDate);
@@ -63,8 +63,8 @@ class QuickImporter extends Importer
         // Status
         $row->status->status = RowStatus::STATUS_NEW;
         $row->status->documentId = $trans[1];
-        $row->status->documentType = ST_BANKPAYMENT;
-        $row->status->link = 'gl/view/gl_payment_view.php?trans_no=' . $row->status->documentId;
+        $row->status->documentType = ST_BANKDEPOSIT;
+        $row->status->link = 'gl/view/gl_deposit_view.php?trans_no=' . $row->status->documentId;
 
     }
 

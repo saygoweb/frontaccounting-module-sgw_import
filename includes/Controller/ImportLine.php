@@ -81,8 +81,9 @@ class ImportLine
             case ImportLineModel::PT_SUPPLIER:
                 $partyCode = PartyCodeModel::findBySupplier($partyId);
                 break;
-            case ImportLineModel::PT_QUICK:
-                $partyCode = PartyCodeModel::findByQuick($partyId);
+            case ImportLineModel::PT_QUICK_DEPOSIT:
+            case ImportLineModel::PT_QUICK_PAYMENT:
+                    $partyCode = PartyCodeModel::findByQuick($partyId);
                 break;
             case ImportLineModel::PT_TRANSFER:
                 $partyCode = PartyCodeModel::findByBank($partyId);

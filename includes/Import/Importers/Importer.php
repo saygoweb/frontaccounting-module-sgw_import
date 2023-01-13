@@ -14,8 +14,10 @@ abstract class Importer
                 return new CustomerImporter($fileType, $importState);
             case ImportLineModel::PT_SUPPLIER:
                 return new SupplierImporter($fileType, $importState);
-            case ImportLineModel::PT_QUICK:
-                return new QuickImporter($fileType, $importState);
+            case ImportLineModel::PT_QUICK_DEPOSIT:
+                return new QuickDepositImporter($fileType, $importState);
+            case ImportLineModel::PT_QUICK_PAYMENT:
+                return new QuickPaymentImporter($fileType, $importState);
             case ImportLineModel::PT_TRANSFER:
                 return new TransferImporter($fileType, $importState);
         }

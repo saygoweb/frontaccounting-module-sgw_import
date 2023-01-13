@@ -9,10 +9,11 @@ use SGW\DB;
 class ImportLineModel extends Model
 {
 
-    const PT_SUPPLIER = 'supplier';
-    const PT_CUSTOMER = 'customer';
-    const PT_QUICK    = 'quick';
-    const PT_TRANSFER = 'transfer';
+    const PT_SUPPLIER      = 'supplier';
+    const PT_CUSTOMER      = 'customer';
+    const PT_QUICK_PAYMENT = 'quick';
+    const PT_QUICK_DEPOSIT = 'quick_deposit';
+    const PT_TRANSFER      = 'transfer';
 
     const DT_NONE = 'none';
     const DT_SUPPLIER_INVOICE = 'supplier_invoice';
