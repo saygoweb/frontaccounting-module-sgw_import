@@ -64,24 +64,28 @@ class ImportFile
             }
         }
         // if (isset($_GET['delete']) && $_GET['delete']) {
-        $this->file = new CsvFile($this->id);
-        $this->fileType = ImportFileTypeModel::findByBankId($this->file->importFileModel->bankId);
-        if ($idAddLine) {
-            $Ajax->activate('_page_body');
-            $row = $this->file->readRow($idAddLine);
-            $lineModel = new ImportLineModel();
-            $lineModel->bankId = $this->file->importFileModel->bankId;
-            $lineModel->partyMatch = $row->data[2]; // TODO
-            // $lineModel->partyType = ImportLineModel::PARTY_SUPPLIER;
-            $lineModel->partyField = 'Payee';
-            $lineModel->write();
-            $this->file->reset();
+        try {
+            $this->file = new CsvFile($this->id);
+            $this->fileType = ImportFileTypeModel::findByBankId($this->file->importFileModel->bankId);
+            if ($idAddLine) {
+                $Ajax->activate('_page_body');
+                $row = $this->file->readRow($idAddLine);
+                $lineModel = new ImportLineModel();
+                $lineModel->bankId = $this->file->importFileModel->bankId;
+                $lineModel->partyMatch = $row->data[2]; // TODO
+                // $lineModel->partyType = ImportLineModel::PARTY_SUPPLIER;
+                $lineModel->partyField = 'Payee';
+                $lineModel->write();
+                $this->file->reset();
+            }
+    
+            $this->lines = new Lines($this->file->importFileModel->bankId);
+            $this->columns = Column::createByArray($this->fileType->columns, $this->fileType->hide);
+            $this->view->viewList($this->file, $this->columns);
+            $this->file->close();
+        } catch (\Exception $e) {
+            $this->view->displayError($e->getMessage());
         }
-
-        $this->lines = new Lines($this->file->importFileModel->bankId);
-        $this->columns = Column::createByArray($this->fileType->columns, $this->fileType->hide);
-        $this->view->viewList($this->file, $this->columns);
-        $this->file->close();
     }
 
     /**

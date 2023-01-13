@@ -130,6 +130,10 @@ class ImportFileView
         end_row();
     }
 
+    public function displayError($msg) {
+        display_error($msg);
+    }
+
 }
 
 add_access_extensions();

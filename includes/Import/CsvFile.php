@@ -39,6 +39,9 @@ class CsvFile
     {
         $filePath = $this->assets->filePath($this->importFileModel->fileName);
         $this->fh = fopen($filePath, 'r');
+        if ($this->fh === false) {
+            throw new \Exception(sprintf("Could not open '%s'", $this->importFileModel->fileName));
+        }
     }
 
     public function close()
