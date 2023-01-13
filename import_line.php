@@ -60,7 +60,8 @@ class ImportLineView
         label_row(_('Party Type:'),
             radio('Customer', 'party_type', ImportLineModel::PT_CUSTOMER, null, true) .
             radio('Supplier', 'party_type', ImportLineModel::PT_SUPPLIER, null, true) .
-            radio('Quick Entry', 'party_type', ImportLineModel::PT_QUICK, null, true) .
+            radio('Quick Payment', 'party_type', ImportLineModel::PT_QUICK_PAYMENT, null, true) .
+            radio('Quick Deposit', 'party_type', ImportLineModel::PT_QUICK_DEPOSIT, null, true) .
             radio('Transfer', 'party_type', ImportLineModel::PT_TRANSFER, null, true)
         );
 
@@ -70,8 +71,10 @@ class ImportLineView
             customer_list_row(_('Customer:'), 'party_id');
         } elseif ($_POST['party_type'] == ImportLineModel::PT_SUPPLIER) {
             supplier_list_row(_('Supplier:'), 'party_id');
-        } elseif ($_POST['party_type'] == ImportLineModel::PT_QUICK) {
-            quick_entries_list_row('Quick Entry:', 'party_id', null, QE_PAYMENT);
+        } elseif ($_POST['party_type'] == ImportLineModel::PT_QUICK_PAYMENT) {
+            quick_entries_list_row('Quick Payment:', 'party_id', null, QE_PAYMENT);
+        } elseif ($_POST['party_type'] == ImportLineModel::PT_QUICK_DEPOSIT) {
+            quick_entries_list_row('Quick Deposit:', 'party_id', null, QE_DEPOSIT);
         } else {
             bank_accounts_list_row(_('Bank Account:'), 'party_id');
         }
