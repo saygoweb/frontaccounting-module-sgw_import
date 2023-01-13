@@ -1,7 +1,7 @@
 {
   "name": "frontaccounting-sgw_import-module",
-  "version": "0.1.0",
-  "description": "Recurring invoicing module for FrontAccounting",
+  "version": "1.1.0",
+  "description": "Import bank data from CSV files",
   "main": "_frontaccounting/index.php",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
