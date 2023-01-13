@@ -68,7 +68,7 @@ class hooks_sgw_import extends hooks
         global $db_connections;
 
         $updates = array(
-            'update_1.0.sql' => array('sales_recurring')
+            // 'update_1.0.sql' => array('sales_recurring')
         );
 
         return $this->update_databases($company, $updates, $check_only);
