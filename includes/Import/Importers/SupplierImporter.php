@@ -48,6 +48,8 @@ class SupplierImporter extends Importer
             ['supplier_id' => $cart->supplier_id, 'date' => $faDate]
         );
 
+        read_supplier_details_to_trans($cart, $line->partyId);
+
         $amount = (float)$row->data[$this->amountColumn];
         $paymentAmount = -$amount; // Positive amounts needed for payments
         $c = count($cart->line_items);
