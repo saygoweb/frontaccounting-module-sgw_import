@@ -4,7 +4,11 @@
   "description": "Import bank data from CSV files",
   "main": "_frontaccounting/index.php",
   "scripts": {
+    "preinstall": "npx npm-force-resolutions",
     "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "resolutions": {
+    "graceful-fs": "^4.2.11"
   },
   "repository": {
     "type": "git",
