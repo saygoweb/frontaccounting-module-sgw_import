@@ -50,7 +50,7 @@ gulp.task('package-zip', function(cb) {
     src: "./",
     name: "frontaccounting",
     version: "2.4.RC1",
-    release: "-sgw_import.module.1.1.0"
+    release: "-sgw_import.module.1.2.0"
   };
   execute(
     'rm -f *.zip && cd <%= src %> && zip -r -x@./upload-exclude-zip.txt -y -q ./<%= name %>-<%= version %><%= release %>.zip *',
