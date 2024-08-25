@@ -45,6 +45,9 @@ class AdminFileType
         }
         if (!$fileTypeModel) {
             $fileTypeModel = ImportFileTypeModel::findOne();
+            if (!$fileTypeModel) {
+                throw new \Exception("No import file types found, try uploading a csv file related to a bank account first.");
+            }
         }
         $this->view->view($fileTypeModel);
     }
