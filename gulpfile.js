@@ -82,7 +82,7 @@ gulp.task('upload', function(cb) {
     dryRun: false,
     silent : false,
     src : ".",
-    dest : "root@saygoweb.com:/var/www/virtual/saygoweb.com/bms/htdocs/"
+    dest : "root@saygoweb.com:/var/www/virtual/saygoweb.com/bms/htdocs/modules/sgw_import/",
   };
   execute(
     'rsync -rzlt --chmod=Dug=rwx,Fug=rw,o-rwx --delete --exclude-from="upload-exclude.txt" --stats --rsync-path="sudo -u vu2006 rsync" --rsh="ssh" <%= src %>/ <%= dest %>',
@@ -91,25 +91,6 @@ gulp.task('upload', function(cb) {
   );
 });
 
-gulp.task('upload-demo', function(cb) {
-  var options = {
-    dryRun: false,
-    silent : false,
-    src : "htdocs",
-    dest : "root@saygoweb.com:/var/www/virtual/saygoweb.com/demo/htdocs/frontaccounting/",
-    key : ""
-  };
-  execute(
-    'rsync -rzlt --chmod=Dug=rwx,Fug=rw,o-rwx --delete --exclude-from="upload-exclude.txt" --stats --rsync-path="sudo -u vu2006 rsync" --rsh="ssh" <%= src %>/ <%= dest %>',
-    options,
-    cb
-  );
-});
-
-/*
- * /c/src/cygwin64/bin/rsync.exe -vaz --rsh="ssh -i ~/ssh/dev-cp-private.key" *
- * root@saygoweb.com:/var/www/virtual/saygoweb.com/bms/htdocs/
- */
 gulp.task('db-backup', function(cb) {
   var options = {
     dryRun : false,
