@@ -52,7 +52,7 @@ class ImportLineModel extends Model
     /** 
      * @return bool
      */
-    public static function delete($id)
+    public static function deleteById($id)
     {
         $model = new ImportLineModel();
         return $model->_mapper->delete($id);
