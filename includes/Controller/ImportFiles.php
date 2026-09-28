@@ -87,7 +87,7 @@ class ImportFiles
                 $this->assets->delete($importFileModel->fileName);
             } catch (\Exception $e) {                
             }
-            ImportFileModel::delete($idDelete);
+            ImportFileModel::deleteById($idDelete);
         }
         if (get_post('delete_all')) {
             $Ajax->activate('_page_body');
