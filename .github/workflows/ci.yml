@@ -1,0 +1,34 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+      - 'feature/**'
+      - 'fix/**'
+      - 'ci/**'
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    strategy:
+      fail-fast: false
+      matrix:
+        fa: [cp, upstream]
+        php: ['7.4', '8.3']
+    uses: cambell-prince/frontaccounting/.github/workflows/plugin-test.yml@master-cp
+    with:
+      fa: ${{ matrix.fa }}
+      php: ${{ matrix.php }}
+      setup: composer install --no-interaction --no-progress
+      # Activated with the modules it is deployed with: they share one PHP
+      # process, and so one Anorm (see tools/ci.sh).
+      with: |
+        graphql=https://github.com/saygoweb/frontaccounting-module-graphql.git@main
+        sgw_sales=https://github.com/saygoweb/frontaccounting-module-sgw_sales.git@master
+      test: sh tools/ci.sh
