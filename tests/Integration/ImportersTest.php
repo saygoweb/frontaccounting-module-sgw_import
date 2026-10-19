@@ -113,14 +113,24 @@ class ImportersTest extends FaTestCase
         )->fetch(\PDO::FETCH_ASSOC);
         $this->assertEqualsWithDelta(-54.32, (float) $payment['ov_amount'], 0.001);
         $this->assertEqualsWithDelta(54.32, (float) $payment['alloc'], 0.001, 'allocated to the invoice');
-        // The invoice's one line is priced at the amount paid; the supplier's
-        // tax (demo tax group 1, 5%) goes on top, and stays unpaid: issue #17.
+        // The amount paid is the invoice's total, its tax (demo tax group 1,
+        // 5%) included, though the demo supplier's prices exclude tax: the
+        // invoice is paid in full (#17).
         $invoice = $this->pdo()->query(
-            'SELECT ov_amount, alloc FROM 0_supp_trans WHERE type = ' . ST_SUPPINVOICE
+            'SELECT trans_no, ov_amount, ov_gst, alloc FROM 0_supp_trans WHERE type = ' . ST_SUPPINVOICE
             . ' AND supplier_id = ' . self::SUPPLIER . " AND tran_date = '" . $this->date(14) . "'"
-        )->fetch(\PDO::FETCH_NUM);
-        $this->assertEqualsWithDelta(54.32, (float) $invoice[0], 0.001, 'the invoice is the amount paid, before tax');
-        $this->assertEqualsWithDelta(54.32, (float) $invoice[1], 0.001, 'and that is allocated');
+        )->fetch(\PDO::FETCH_ASSOC);
+        $total = (float) $invoice['ov_amount'] + (float) $invoice['ov_gst'];
+        $this->assertEqualsWithDelta(54.32, $total, 0.001, 'the invoice is the amount paid');
+        $this->assertEqualsWithDelta(54.32, (float) $invoice['alloc'], 0.001, 'paid in full');
+        $tax = $this->pdo()->query(
+            'SELECT included_in_price, amount, net_amount FROM 0_trans_tax_details WHERE trans_type = '
+            . ST_SUPPINVOICE . ' AND trans_no = ' . (int) $invoice['trans_no']
+        )->fetch(\PDO::FETCH_ASSOC);
+        $this->assertSame('1', (string) $tax['included_in_price'], 'the tax is in the price');
+        $this->assertEqualsWithDelta(2.59, (float) $tax['amount'], 0.001, 'the tax');
+        $this->assertEqualsWithDelta(51.73, (float) $tax['net_amount'], 0.001, 'net of tax');
+        $this->assertGlBalanced(ST_SUPPINVOICE, (int) $invoice['trans_no']);
         $this->assertGlBalanced(ST_SUPPAYMENT, (int) $row->status->documentId);
     }
 
