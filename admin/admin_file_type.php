@@ -38,8 +38,9 @@ class AdminFileTypeView
     public function view(ImportFileTypeModel $fileTypeModel)
     {
         Mapper::writeArray($fileTypeModel, $_POST);
-        $_POST['date_field'] = $fileTypeModel->columnKey($fileTypeModel->dateField);
-        $_POST['amount_field'] = $fileTypeModel->columnKey($fileTypeModel->amountField);
+        // Not set yet for a file type just made by its first upload.
+        $_POST['date_field'] = $fileTypeModel->dateField ? $fileTypeModel->columnKey($fileTypeModel->dateField) : null;
+        $_POST['amount_field'] = $fileTypeModel->amountField ? $fileTypeModel->columnKey($fileTypeModel->amountField) : null;
 
         start_form();
 

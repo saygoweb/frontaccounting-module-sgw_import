@@ -65,6 +65,13 @@ class CustomerImporter extends Importer
             $cart = new \Cart(ST_SALESINVOICE);
             $cart->order_no = 0;
             $cart->document_date = $faDate;
+            // The customer's branch, sales type, tax group and location, as
+            // FrontAccounting's own invoice entry fills them.
+            $branch = get_default_branch($line->partyId);
+            $error = get_customer_details_to_order($cart, $line->partyId, $branch['branch_code']);
+            if ($error) {
+                throw new \Exception($error);
+            }
             $cart->due_date = $faDate;
             $cart->cust_ref = $sqlDate;
             $cart->customer_id = $line->partyId;
@@ -121,9 +128,15 @@ class CustomerImporter extends Importer
             $allocation->amount = $amount;
             $allocation->person_type = PT_CUSTOMER;
             $allocation->person_id = $line->partyId;
-            $allocation->add_item(
+            // Reading an existing payment, the cart spreads its unallocated
+            // amount over the customer's earliest open invoices; allocate it
+            // to this invoice alone instead.
+            foreach ($allocation->allocs as $item) {
+                $item->current_allocated = 0;
+            }
+            $allocation->add_or_update_item(
                 ST_SALESINVOICE, $invoiceTransactionNumber, $faDate, $faDate,
-                $amount, $amount, $amount, $paymentRef
+                $amount, $amount, $amount, $paymentRef, ''
             );
             $allocation->write();
         }

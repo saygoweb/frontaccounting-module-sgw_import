@@ -6,3 +6,5 @@
 *.zip
 /backup
 /uploads
+*.cache
+/build/

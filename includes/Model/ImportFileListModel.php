@@ -9,7 +9,7 @@ use SGW\DB;
 class ImportFileListModel extends ImportFileModel
 {
     /**
-     * @return Generator<ImportFileListModel>|ImportFileListModel[]|boolean
+     * @return \Generator<ImportFileListModel>|ImportFileListModel[]|boolean
      */
     public static function find()
     {

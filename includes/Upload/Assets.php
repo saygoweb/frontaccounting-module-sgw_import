@@ -13,7 +13,7 @@ class Assets
     }
 
     /** 
-     * @param string
+     * @param string $fileIndex
      * @return boolean
      */
     public function exists(string $fileIndex)

@@ -18,7 +18,7 @@ class CsvFile
     /** @var Assets */
     private $assets;
 
-    /** @var FILE */
+    /** @var resource|null */
     private $fh = null;
 
     /** @var Row */

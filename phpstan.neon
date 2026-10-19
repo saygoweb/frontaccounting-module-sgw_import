@@ -1,0 +1,39 @@
+includes:
+    # What includes/ had before this file did. New code gets none.
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+
+    # FrontAccounting is a .inc codebase. Without this, scanDirectories below
+    # finds almost none of it.
+    fileExtensions:
+        - php
+        - inc
+
+    paths:
+        - includes
+        - tests
+
+    # FrontAccounting itself, two directories up: this module lives at
+    # modules/sgw_import inside an FA tree, as it does in the FrontAccounting
+    # CI image. Read for symbols only, never analysed.
+    scanDirectories:
+        - ../../includes
+        - ../../gl/includes
+        - ../../sales/includes
+        - ../../purchasing/includes
+        - ../../admin/db
+
+    scanFiles:
+        - ../../frontaccounting.php
+        # The pages, for the view classes the controllers call.
+        - import_file.php
+        - import_files.php
+        - import_line.php
+        - admin/admin_file_type.php
+
+    # graphql's Bootstrap for the integration tests, when graphql is beside
+    # this module.
+    bootstrapFiles:
+        - tests/bootstrap.php

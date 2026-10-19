@@ -6,10 +6,53 @@
     "require": {
         "saygoweb/anorm": "^3.2.1"
     },
+    "require-dev": {
+        "phpstan/phpstan": "^1.10",
+        "phpunit/phpunit": "^9.6",
+        "squizlabs/php_codesniffer": "^3.7"
+    },
+    "config": {
+        "platform": {
+            "php": "7.4.33"
+        },
+        "sort-packages": true
+    },
     "autoload": {
         "psr-4": {
             "SGW\\": "includes/common/",
             "SGW_Import\\": "includes/"
         }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "SGW_Import\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "phpunit -c phpunit.xml",
+        "test:coverage": "phpunit -c phpunit.xml --coverage-clover build/coverage.xml --coverage-text",
+        "lint": "find . \\( -name vendor -o -name node_modules \\) -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 php -l",
+        "cs:check": "phpcs",
+        "cs:fix": "phpcbf",
+        "analyze": "phpstan analyse --no-progress --memory-limit=512M",
+        "quality": [
+            "@lint",
+            "@cs:check",
+            "@analyze"
+        ],
+        "ci": [
+            "@quality",
+            "@test"
+        ]
+    },
+    "scripts-descriptions": {
+        "test": "Run the PHPUnit suites. integration and http need FrontAccounting and the GraphQL module beside this one: tools/ci.sh in FrontAccounting's CI image does that.",
+        "test:coverage": "test, with a Clover report in build/coverage.xml (tools/coverage.sh loads xdebug for it).",
+        "lint": "php -l over every PHP file in the module.",
+        "cs:check": "Check includes/ and tests/ against PSR-12 (phpcs.xml).",
+        "cs:fix": "Fix what phpcbf can fix automatically.",
+        "analyze": "Run PHPStan over includes/ (phpstan.neon).",
+        "quality": "lint, cs:check, then analyze.",
+        "ci": "quality, then test - the gates tools/ci.sh runs."
     }
 }
