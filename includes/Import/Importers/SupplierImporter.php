@@ -77,7 +77,7 @@ class SupplierImporter extends Importer
         $allocation->person_id = $line->partyId;
         $allocation->add_item(
             ST_SUPPINVOICE, $transNumber, $faDate, $faDate,
-            $paymentAmount, $paymentAmount, $paymentAmount, $paymentRef
+            $paymentAmount, $paymentAmount, $paymentAmount, $paymentRef, $cart->supp_ref
         );
         $allocation->write();
 

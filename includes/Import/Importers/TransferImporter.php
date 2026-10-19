@@ -52,7 +52,11 @@ class TransferImporter extends Importer
 
         $ref = $Refs->get_next(ST_BANKTRANSFER);
 
-        $trans_no = add_bank_transfer($fromAccountId, $toAccountId, $faDate, abs($amount), $ref, $line->partyCode, 0, 0);
+        // Every argument: add_bank_transfer() array_combine()s its arguments with
+        // its ten parameter names, which PHP 8 refuses to do with fewer.
+        $trans_no = add_bank_transfer(
+            $fromAccountId, $toAccountId, $faDate, abs($amount), $ref, $line->partyCode, 0, 0, 0, 0
+        );
 
         $row->status->status = RowStatus::STATUS_NEW;
         $row->status->documentId = $trans_no;

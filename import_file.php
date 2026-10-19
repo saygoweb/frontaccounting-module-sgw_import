@@ -30,6 +30,8 @@ include_once($path_to_root . "/includes/ui/db_pager_view.inc");
 include_once($path_to_root . '/includes/ui/items_cart.inc');
 include_once($path_to_root . '/purchasing/includes/po_class.inc');
 include_once($path_to_root . "/includes/ui/allocation_cart.inc");
+// The sales cart, and get_customer_details_to_order(), for a line that invoices the customer.
+include_once($path_to_root . '/sales/includes/ui/sales_order_ui.inc');
 
 
 class ImportFileView

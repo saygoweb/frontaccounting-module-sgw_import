@@ -51,6 +51,9 @@ abstract class Importer
                     throw new \Exception(sprintf("Bad date '%s'", $data));
                 }
                 $d = \DateTime::createFromFormat('d/m/y', $data);
+                if ($d === false) {
+                    throw new \Exception(sprintf("Bad date '%s'", $data));
+                }
                 return $d->format('Y-m-d');
             default:
                 throw new \Exception(sprintf("Unsupported date format '%s'", $this->fileType->dateFormat));
