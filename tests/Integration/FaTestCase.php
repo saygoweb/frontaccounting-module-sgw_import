@@ -6,12 +6,15 @@ use Anorm\Anorm;
 use FA\GraphQL\Config;
 use FA\GraphQL\Fa\Bootstrap;
 use FA\GraphQL\Fa\FaSession;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 use SGW\DB;
 use SGW_Import\Import\Row;
+use SGW_Import\Model\ImportFileModel;
 use SGW_Import\Model\ImportFileTypeModel;
 use SGW_Import\Model\ImportLineModel;
 use SGW_Import\Tests\Support\FaRows;
+use SGW_Import\Tests\Support\UploadFolder;
 
 /**
  * Tests that load FrontAccounting in-process, by the GraphQL module's Bootstrap
@@ -34,6 +37,11 @@ abstract class FaTestCase extends TestCase
     private ?\PDO $pdo = null;
 
     private ?FaRows $rows = null;
+
+    private ?UploadFolder $folder = null;
+
+    /** @var string[] names of files a test put in uploads/ */
+    private array $uploaded = [];
 
     protected function setUp(): void
     {
@@ -85,6 +93,64 @@ abstract class FaTestCase extends TestCase
         if ($this->rows !== null) {
             $this->rows->purge();
         }
+        if ($this->folder !== null) {
+            clearstatcache();
+            foreach ($this->uploaded as $name) {
+                if (is_file($this->folder->path($name))) {
+                    unlink($this->folder->path($name));
+                }
+            }
+            $this->folder->remove();
+        }
+    }
+
+    /**
+     * A view for a controller: the page's view class lives in the page, which
+     * renders as it is included, so a mock with just the methods the
+     * controller calls.
+     *
+     * @param string[] $methods
+     * @return MockObject&\stdClass
+     */
+    protected function view(array $methods): MockObject
+    {
+        return $this->getMockBuilder(\stdClass::class)->addMethods($methods)->getMock();
+    }
+
+    protected function uploads(): UploadFolder
+    {
+        if ($this->folder === null) {
+            $this->folder = new UploadFolder();
+        }
+
+        return $this->folder;
+    }
+
+    /**
+     * A file name in uploads/ that no other test uses, removed in tearDown.
+     */
+    protected function uploadName(): string
+    {
+        $name = $this->uploads()->uniqueName();
+        $this->uploaded[] = $name;
+
+        return $name;
+    }
+
+    /**
+     * $csv imported for the bank account, as Import Transactions leaves it: the
+     * file in uploads/, and its record.
+     */
+    protected function importFile(string $csv, int $bankId = self::BANK): ImportFileModel
+    {
+        $name = $this->uploadName();
+        file_put_contents($this->uploads()->path($name), $csv);
+        $file = new ImportFileModel();
+        $file->bankId = $bankId;
+        $file->fileName = $name;
+        $file->write();
+
+        return $file;
     }
 
     protected function pdo(): \PDO

@@ -3,8 +3,6 @@
 namespace SGW_Import\Tests\Integration;
 
 use SGW_Import\Import\CsvFile;
-use SGW_Import\Model\ImportFileModel;
-use SGW_Import\Tests\Support\UploadFolder;
 
 /**
  * @runTestsInSeparateProcesses
@@ -12,26 +10,6 @@ use SGW_Import\Tests\Support\UploadFolder;
  */
 class CsvFileTest extends FaTestCase
 {
-    private UploadFolder $folder;
-
-    private string $name;
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->folder = new UploadFolder();
-        $this->name = $this->folder->uniqueName();
-    }
-
-    protected function tearDown(): void
-    {
-        if (is_file($this->folder->path($this->name))) {
-            unlink($this->folder->path($this->name));
-        }
-        $this->folder->remove();
-        parent::tearDown();
-    }
-
     public function testRowsAreReadInOrderAfterTheHeader(): void
     {
         $csv = new CsvFile($this->import(
@@ -70,12 +48,6 @@ class CsvFileTest extends FaTestCase
 
     private function import(string $contents): int
     {
-        file_put_contents($this->folder->path($this->name), $contents);
-        $file = new ImportFileModel();
-        $file->bankId = self::BANK;
-        $file->fileName = $this->name;
-        $file->write();
-
-        return (int) $file->id;
+        return (int) $this->importFile($contents)->id;
     }
 }
