@@ -26,6 +26,15 @@ class ImportFile
     /** @var ImportFileTypeModel */
     private $fileType;
 
+    /** @var int|string */
+    private $id;
+
+    /** @var Lines */
+    private $lines;
+
+    /** @var Column[] */
+    private $columns;
+
     const FORCE_NO    = 'no';
     const FORCE_CHECK = '1';
     const FORCE_CLEAR = '0';

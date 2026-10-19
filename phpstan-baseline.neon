@@ -1,0 +1,16 @@
+parameters:
+	ignoreErrors:
+		-
+			message: "#^Access to an undefined property items_cart\\:\\:\\$tax_group_id\\.$#"
+			count: 1
+			path: includes/Import/Importers/QuickDepositImporter.php
+
+		-
+			message: "#^Access to an undefined property items_cart\\:\\:\\$tax_group_id\\.$#"
+			count: 1
+			path: includes/Import/Importers/QuickPaymentImporter.php
+
+		-
+			message: "#^Property SGW_Import\\\\Import\\\\Lines\\:\\:\\$lines is never read, only written\\.$#"
+			count: 1
+			path: includes/Import/Lines.php

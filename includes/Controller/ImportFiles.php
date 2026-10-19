@@ -69,7 +69,7 @@ class ImportFiles
             if ($key[0] != 'd') {
                 continue;
             }
-            $tokens = explode('_', $key) ?? [];
+            $tokens = explode('_', $key);
             if (count($tokens) != 2) {
                 continue;
             }

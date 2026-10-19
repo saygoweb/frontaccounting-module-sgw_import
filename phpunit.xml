@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.6/phpunit.xsd"
+	bootstrap="tests/bootstrap.php"
+	colors="true"
+	convertDeprecationsToExceptions="false"
+>
+	<testsuites>
+		<!-- No FrontAccounting, no database, no web server. -->
+		<testsuite name="unit">
+			<directory>tests/Unit</directory>
+		</testsuite>
+		<!-- FrontAccounting loaded in-process (by the GraphQL module's Bootstrap), and the database. Needs the FrontAccounting CI image. -->
+		<testsuite name="integration">
+			<directory>tests/Integration</directory>
+		</testsuite>
+		<!-- Drives Apache over HTTP; needs the FrontAccounting CI image. -->
+		<testsuite name="http">
+			<directory>tests/Http</directory>
+		</testsuite>
+	</testsuites>
+	<!-- Measured only when a coverage driver is loaded: tools/coverage.sh. -->
+	<coverage>
+		<include>
+			<directory suffix=".php">includes</directory>
+		</include>
+	</coverage>
+</phpunit>

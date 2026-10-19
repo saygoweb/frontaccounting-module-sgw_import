@@ -29,7 +29,7 @@ class ImportLineModel extends Model
     }
 
     /**
-     * @return Generator<ImportLineModel>|ImportLineModel[]|bool
+     * @return \Generator<ImportLineModel>|ImportLineModel[]|bool
      */
     public static function findByBankId($bankId)
     {

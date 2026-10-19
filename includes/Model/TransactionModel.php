@@ -15,7 +15,7 @@ class TransactionModel extends Model
         $this->_mapper->mode = DataMapper::MODE_STATIC;
     }
 
-    /** @return Generator<TransactionModel>|TransactionModel[]|null */
+    /** @return \Generator<TransactionModel>|TransactionModel[]|null */
     public static function fromBankTransfer($date, $amount, $from, $to)
     {
         $amount = abs($amount);
@@ -30,7 +30,7 @@ class TransactionModel extends Model
         return $result;
     }
 
-    /** @return Generator<TransactionModel>|TransactionModel[]|null */
+    /** @return \Generator<TransactionModel>|TransactionModel[]|null */
     public static function fromBankTransaction($date, $amount, $account, $type)
     {
         if ($type == ST_BANKPAYMENT && $amount > 0.0) {
@@ -47,7 +47,7 @@ class TransactionModel extends Model
         return $result;
     }
 
-    /** @return Generator<TransactionModel>|TransactionModel[]|null */
+    /** @return \Generator<TransactionModel>|TransactionModel[]|null */
     public static function fromBankPaymentAndInvoice($date, $amount, $account, $invoiceRef)
     {
         $fromType = ST_CUSTPAYMENT;
@@ -67,7 +67,7 @@ class TransactionModel extends Model
         return $result;
     }
 
-    /** @return Generator<TransactionModel>|TransactionModel[]|null */
+    /** @return \Generator<TransactionModel>|TransactionModel[]|null */
     public static function fromBankPaymentAndPartyId($date, $amount, $account, $partyId)
     {
         $bank_trans = DB::prefix('bank_trans');
@@ -84,7 +84,7 @@ class TransactionModel extends Model
         return $result;
     }
 
-    /** @return Generator<TransactionModel>|TransactionModel[]|null */
+    /** @return \Generator<TransactionModel>|TransactionModel[]|null */
     public static function fromPartyIdAndUnallocatedInvoices($partyId)
     {
         $debtor_trans = DB::prefix('debtor_trans');
