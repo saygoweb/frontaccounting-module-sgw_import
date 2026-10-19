@@ -49,6 +49,10 @@ class SupplierImporter extends Importer
         );
 
         read_supplier_details_to_trans($cart, $line->partyId);
+        // The bank line is what was paid, tax and all, whether or not the
+        // supplier's prices include tax: price the invoice's line that way so
+        // its total is the payment (#17).
+        $cart->tax_included = 1;
 
         $amount = (float)$row->data[$this->amountColumn];
         $paymentAmount = -$amount; // Positive amounts needed for payments
