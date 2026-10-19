@@ -39,8 +39,9 @@ and 8.3. It runs:
 - The PHPUnit suites (`phpunit.xml`):
   - `unit`: no FrontAccounting, no database.
   - `integration`: FrontAccounting loaded in-process by the GraphQL module's
-    Bootstrap. It covers the models, and each importer writing a bank line
-    and finding it again on a later import.
+    Bootstrap. It covers the models, each importer writing a bank line and
+    finding it again on a later import, and the controllers, with their views
+    mocked.
   - `http`: the pages in Apache. A file is uploaded, configured, given lines,
     imported, imported again and deleted.
 
