@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "54e61b06424d7da5b68f941daacb6e2a",
+    "content-hash": "62723e976f9e9d15386c8ea004341f37",
     "packages": [
         {
             "name": "saygoweb/anorm",
