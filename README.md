@@ -57,3 +57,19 @@ To run CI locally, with that repository checked out beside this one:
 
 `tools/coverage.sh` in place of `tools/ci.sh` measures the unit and
 integration suites into `build/coverage.xml`; CI sends that to Codecov.
+
+## Releasing
+
+Releases are tags. On the deploy branch (`master`), with CI green:
+
+    git tag v1.2.3 && git push origin v1.2.3
+
+`.github/workflows/release.yml` runs the tests, then packages the module with
+FrontAccounting's `docker/ci/fa-module` and publishes the GitHub release:
+`frontaccounting-2.4-sgw_import.module.1.2.3.tgz` and `.zip`, each with
+`_init/config` (`Version: 2.4-1.2.3`). Untagged builds, such as bms's deploys,
+are versioned `2.4-1.2.3-<n>-g<sha>`.
+
+`composer fa:version` prints this checkout's version and
+`composer fa:package` builds the packages into `build/dist/`. Both run from
+inside a FrontAccounting checkout (`modules/sgw_import`).
