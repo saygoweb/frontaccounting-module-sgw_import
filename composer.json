@@ -38,7 +38,7 @@
         "fa:package": "sh ../../docker/ci/fa-module package",
         "test": "phpunit -c phpunit.xml",
         "test:coverage": "phpunit -c phpunit.xml --coverage-clover build/coverage.xml --coverage-text",
-        "lint": "find . \\( -name vendor -o -name node_modules \\) -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 php -l",
+        "lint": "find . -name vendor -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 php -l",
         "cs:check": "phpcs",
         "cs:fix": "phpcbf",
         "analyze": "phpstan analyse --no-progress --memory-limit=512M",
