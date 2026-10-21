@@ -2,9 +2,15 @@
 /node_modules/
 /_frontaccounting
 /.vscode
+/.claude/
 *.tgz
 *.zip
-/backup
-/uploads
+/backup/
+/uploads/*
+!/uploads/.gitkeep
 *.cache
 /build/
+
+# Release packaging (docker/ci/fa-module)
+/_init/
+/build/dist/

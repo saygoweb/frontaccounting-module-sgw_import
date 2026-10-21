@@ -69,11 +69,50 @@ class hooks_sgw_import extends hooks
     {
         global $db_connections;
 
+        if (!$check_only) {
+            $this->refresh_own_version();
+        }
+
         $updates = array(
             // 'update_1.0.sql' => array('sales_recurring')
         );
 
         return $this->update_databases($company, $updates, $check_only);
+    }
+
+    /*
+        Stock FrontAccounting reads modules/<id>/_init/config (written by the
+        module's build, docker/ci/fa-module) only when the extension is first
+        installed. Refresh the stored version on activation so an upgrade shows
+        its version on Install/Activate Extensions.
+    */
+    function refresh_own_version()
+    {
+        global $path_to_root;
+
+        $file = $path_to_root . '/modules/' . $this->module_name . '/_init/config';
+        if (!is_file($file)) {
+            return;
+        }
+        $version = null;
+        foreach (file($file) as $line) {
+            if (preg_match('/^Version:\s*(\S+)/', $line, $m)) {
+                $version = $m[1];
+            }
+        }
+        if ($version === null) {
+            return;
+        }
+        $exts = get_company_extensions();
+        foreach ($exts as $i => $ext) {
+            if (@$ext['package'] === $this->module_name && @$ext['type'] === 'extension') {
+                if (@$ext['version'] !== $version) {
+                    $exts[$i]['version'] = $version;
+                    update_extensions($exts);
+                }
+                return;
+            }
+        }
     }
 
     private function remove_menu_item(&$items, $offset)

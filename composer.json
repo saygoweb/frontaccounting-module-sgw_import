@@ -28,7 +28,14 @@
             "SGW_Import\\Tests\\": "tests/"
         }
     },
+    "extra": {
+        "fa-module": {
+            "name": "Bank Import"
+        }
+    },
     "scripts": {
+        "fa:version": "sh ../../docker/ci/fa-module version",
+        "fa:package": "sh ../../docker/ci/fa-module package",
         "test": "phpunit -c phpunit.xml",
         "test:coverage": "phpunit -c phpunit.xml --coverage-clover build/coverage.xml --coverage-text",
         "lint": "find . \\( -name vendor -o -name node_modules \\) -prune -o -type f -name '*.php' -print0 | xargs -0 -n1 php -l",
