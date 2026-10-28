@@ -75,6 +75,19 @@ class ImportFileTypeModel extends Model
         return $result;
     }
 
+    /**
+     * The key of the column a line reads $name from, where no name ('' or
+     * null) is the file's blank column, as a trailing comma in its header
+     * makes; null when the file has no such column.
+     *
+     * @return int|null
+     */
+    public function fieldKey(?string $name)
+    {
+        $result = array_search((string) $name, $this->columns, true);
+        return $result === false ? null : $result;
+    }
+
     /** @var int */
     public $id;
 

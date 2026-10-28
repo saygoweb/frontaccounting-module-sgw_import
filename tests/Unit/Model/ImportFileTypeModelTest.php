@@ -22,4 +22,21 @@ class ImportFileTypeModelTest extends TestCase
         $this->expectExceptionMessage("Column 'Memo' not found");
         $fileType->columnKey('Memo');
     }
+
+    public function testFieldKeyIsTheBlankColumnForNoField(): void
+    {
+        $fileType = Models::fileType(['columns' => ['Date', 'Amount', 'Payee', '']]);
+
+        $this->assertSame(2, $fileType->fieldKey('Payee'));
+        $this->assertSame(3, $fileType->fieldKey(''));
+        $this->assertSame(3, $fileType->fieldKey(null));
+    }
+
+    public function testFieldKeyIsNullForAColumnTheFileLacks(): void
+    {
+        $fileType = Models::fileType(['columns' => ['Date', 'Amount', 'Payee']]);
+
+        $this->assertNull($fileType->fieldKey('Memo'));
+        $this->assertNull($fileType->fieldKey(''));
+    }
 }

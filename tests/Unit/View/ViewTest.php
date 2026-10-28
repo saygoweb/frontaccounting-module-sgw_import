@@ -21,6 +21,21 @@ class ViewTest extends TestCase
         $this->assertStringContainsString('<option value="ddmmyy" selected>DD/MM/YY</option>', $html);
     }
 
+    public function testComboSelectsNothingForNoValue(): void
+    {
+        $html = View::combo('field', ['Date', 'Amount', '']);
+
+        $this->assertStringNotContainsString('selected', $html);
+    }
+
+    public function testComboSelectsABlankOptionByItsKey(): void
+    {
+        $html = View::combo('field', ['Date', 'Amount', ''], '2');
+
+        $this->assertStringContainsString('<option value="0">Date</option>', $html);
+        $this->assertStringContainsString('<option value="2" selected></option>', $html);
+    }
+
     public function testComboFallsBackToThePostedValue(): void
     {
         $_POST['format'] = 'yyyymmdd';
