@@ -45,19 +45,25 @@ abstract class Importer
     {
         switch ($this->fileType->dateFormat) {
             case ImportFileTypeModel::DTF_YYYYMMDD:
-                return $data;
+                return self::parseDate('Y-m-d', $data);
             case ImportFileTypeModel::DTF_DDMMYY:
-                if (strlen($data) != 8) {
-                    throw new \Exception(sprintf("Bad date '%s'", $data));
-                }
-                $d = \DateTime::createFromFormat('d/m/y', $data);
-                if ($d === false) {
-                    throw new \Exception(sprintf("Bad date '%s'", $data));
-                }
-                return $d->format('Y-m-d');
+                return self::parseDate('d/m/y', $data);
             default:
                 throw new \Exception(sprintf("Unsupported date format '%s'", $this->fileType->dateFormat));
         }
+    }
+
+    /**
+     * MySQL stores a malformed date as 0000-00-00 or reads it as another date,
+     * so refuse anything that does not format back to exactly what was read.
+     */
+    private static function parseDate(string $format, string $data): string
+    {
+        $d = \DateTime::createFromFormat('!' . $format, $data);
+        if ($d === false || $d->format($format) !== $data) {
+            throw new \Exception(sprintf("Bad date '%s'", $data));
+        }
+        return $d->format('Y-m-d');
     }
 
     public function docReference(Row $row, ImportLineModel $line)
