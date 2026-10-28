@@ -26,15 +26,16 @@ class AdminFileType
         $fileTypeModel = null;
         $idDelete = find_submit('Delete');
         if ($idDelete != -1) {
+            $Ajax->activate('_page_body');
             ImportLineModel::deleteById($idDelete);
         }
         if (list_updated('bank_id')) {
-            $Ajax->activate('page_body');
+            $Ajax->activate('_page_body');
             $bankId = get_post('bank_id');
             $fileTypeModel = ImportFileTypeModel::findByBankId($bankId);
         } elseif (isset($_POST['id'])) {
             $id = get_post('id');
-            $Ajax->activate('page_body');
+            $Ajax->activate('_page_body');
             $fileTypeModel = new ImportFileTypeModel();
             $fileTypeModel->readOrThrow($id);
             $fileTypeModel->hide = explode(',', $_POST['hide']);
