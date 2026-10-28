@@ -127,12 +127,29 @@ class ImportFileTest extends FaTestCase
         $this->assertSame(['No lines selected for import.'], FaMessages::errors());
     }
 
-    public function testSelectAllTicksEveryRow(): void
+    public function testSelectAllTicksEveryRowWithALine(): void
     {
+        $this->line(ImportLineModel::PT_QUICK_PAYMENT, self::QUICK_PAYMENT, 'Phone Co');
+
         $this->table(['_select_all_update' => '1', 'select_all' => '1']);
 
         $this->assertSame('1', $_POST['s_1']);
-        $this->assertSame('1', $_POST['s_2']);
+        $this->assertArrayNotHasKey('s_2', $_POST, 'a row without a line has no checkbox');
+    }
+
+    /**
+     * Select all, then Import Data: the rows without a line are passed over,
+     * not imported (which has no line to import them by).
+     */
+    public function testImportPassesOverATickedRowWithoutALine(): void
+    {
+        $this->line(ImportLineModel::PT_QUICK_PAYMENT, self::QUICK_PAYMENT, 'Phone Co');
+
+        $this->table(['submit_import' => 'Import Data', 's_1' => '1', 's_2' => '1']);
+
+        $this->assertSame(RowStatus::STATUS_NEW, $this->rows[1]['row']->status->status);
+        $this->assertSame(1, $this->payments());
+        $this->assertSame([], FaMessages::errors());
     }
 
     public function testColumnHiddenFollowsTheFileType(): void

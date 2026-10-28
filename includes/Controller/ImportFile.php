@@ -117,14 +117,15 @@ class ImportFile
         $importState = new ImportState();
         while ($row = $this->file->read()) {
             $key = 's_' . $row->rowIndex;
-            if ($this->force != self::FORCE_NO) {
+            $matchingLine = $this->lines->matchingLine($row);
+            // A row without a line has no checkbox, and nothing to import it by.
+            if ($this->force != self::FORCE_NO && $matchingLine !== null) {
                 $_POST[$key] = $this->force;
             }
-            $matchingLine = $this->lines->matchingLine($row);
             if ($doImport) {
                 $row->status = new RowStatus();
             }
-            if ($doImport && isset($_POST[$key]) && $_POST[$key]) {
+            if ($doImport && $matchingLine !== null && isset($_POST[$key]) && $_POST[$key]) {
                 $countImport++;
                 $this->importLine($row, $matchingLine, $importState);
             }
