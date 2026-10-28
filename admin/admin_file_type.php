@@ -82,7 +82,8 @@ class AdminFileTypeView
         $header[] = _('Match');
         $header[] = _('Type');
         $header[] = _('Code');
-        $header[] = ''; // Button
+        $header[] = ''; // Edit
+        $header[] = ''; // Delete
 
         table_header($header);
         // display_heading('Lines');
@@ -111,7 +112,8 @@ class AdminFileTypeView
         label_cell($lineModel->docCode);
 
         // label_cell('');
-        hyperlink_params_td('../import_line.php', 'Edit Line', 'id=' . $lineModel->id);
+        label_cell(pager_link(_('Edit'), '/modules/sgw_import/import_line.php?id=' . $lineModel->id, ICON_EDIT), "align='center'");
+        delete_button_cell('Delete' . $lineModel->id, _('Delete'), _('Delete this line'));
 
         // if ($row->lineId !== null) {
         //     hyperlink_params_td('import_line.php', 'Edit Line', 'id=' . $row->lineId);
