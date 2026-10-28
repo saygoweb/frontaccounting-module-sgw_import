@@ -38,9 +38,9 @@ class ImportLineView
     public function view(ImportLineModel $lineModel, ImportFileTypeModel $fileTypeModel)
     {
         Mapper::writeArray($lineModel, $_POST, ['partyField', 'docField']);
-        // Not set yet for a line just made by Add Line.
-        $_POST['party_field'] = $lineModel->partyField ? $fileTypeModel->columnKey($lineModel->partyField) : null;
-        $_POST['doc_field'] = $lineModel->docField ? $fileTypeModel->columnKey($lineModel->docField) : null;
+        // Blank, or not set yet for a line just made by Add Line, is the blank column.
+        $_POST['party_field'] = $fileTypeModel->fieldKey($lineModel->partyField);
+        $_POST['doc_field'] = $fileTypeModel->fieldKey($lineModel->docField);
         
         start_form();
 

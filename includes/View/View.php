@@ -10,7 +10,7 @@ class View
         }
         $v = '<select name="' . $name . '" id="' . $name . '">' . "\n";
         foreach ($options as $key => $option) {
-            $selected = $key == $value ? ' selected' : '';
+            $selected = $value !== null && (string) $key === (string) $value ? ' selected' : '';
             $v .= '<option value="' . $key . '"' . $selected . '>' . $option . '</option>' . "\n";
         }
         return $v;

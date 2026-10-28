@@ -222,6 +222,42 @@ class ImportFlowTest extends TestCase
         $this->assertStringContainsString('Date,Amount,Payee', $page);
     }
 
+    public function testEditLineKeepsABlankDocumentField(): void
+    {
+        // A trailing comma, as in BNZ's exports, makes a blank last column.
+        $this->upload("Date,Amount,Payee,\n");
+        $this->pdo->exec(
+            "INSERT INTO 0_import_line (bank_id, party_field, party_match, party_code, party_type, party_id,
+                doc_field, doc_match, doc_type, doc_code)
+             VALUES (" . self::BANK . ", 'Payee', 'Phone Co', 'Phone Co', 'supplier', 1, '', '', 'none', '')"
+        );
+        $lineId = (int) $this->pdo->lastInsertId();
+
+        $page = $this->browser->get("modules/sgw_import/import_line.php?id=$lineId");
+        $this->assertPageOk($page);
+        $this->assertMatchesRegularExpression(
+            '#<select name="doc_field"[^>]*>\s*<option value="0">Date</option>#',
+            $page
+        );
+        $this->assertStringContainsString('<option value="3" selected></option>', $page);
+
+        $this->assertPageOk($this->browser->post("modules/sgw_import/import_line.php?id=$lineId", [
+            'id' => $lineId,
+            'bank_id' => self::BANK,
+            'party_match' => 'Phone Co',
+            'party_field' => 2,
+            'party_type' => 'supplier',
+            'party_id' => 1,
+            'doc_field' => 3,
+            'doc_match' => '',
+            'doc_type' => 'none',
+            'stock_id' => '',
+            'UPDATE_ITEM' => 'Update',
+        ]));
+        $docField = $this->pdo->query("SELECT doc_field FROM 0_import_line WHERE id = $lineId")->fetchColumn();
+        $this->assertSame('', $docField);
+    }
+
     private function upload(string $csv): string
     {
         $tmp = (string) tempnam(sys_get_temp_dir(), 'csv');
