@@ -22,6 +22,7 @@ The menu items `Import Transactions` and `Configure Import Transactions` have be
 
 1. `Import Transactions`, upload a csv file setting the correct bank account.
 2. `Configure Import Transactions`, set the date field, date format, and amount field. Optionally hide some columns you don't need to see in the import transactions screens.
+   Dates are read in any of the forms BNZ's exports use (`08/09/26`, `08/09/2026`, `2026-09-08`), whichever date format is set; a date in any other form stops the import.
 3. Back to `Import Transactions`. Click the filename or number. Add line definitions to those pesky recurring transactions. It's ok to leave some that are one off, or better done manually.
 
 ## Tests

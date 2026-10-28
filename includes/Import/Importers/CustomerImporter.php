@@ -23,7 +23,9 @@ class CustomerImporter extends Importer
                 $t2[] = clone $transaction;
                 $c2++;
             }
-            if ($c2 == 1) {
+            // A payment an earlier row took is not this row's: the customer
+            // paid the invoice again, so look for another payment that day.
+            if ($c2 == 1 && !$this->importState->isUsed($sqlDate, $line->partyCode, $amount, $t2[0]->number)) {
                 $row->status->status = RowStatus::STATUS_EXISTING;
                 $row->status->documentType = $t2[0]->type;
                 $row->status->documentId = $t2[0]->number;

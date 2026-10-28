@@ -225,6 +225,39 @@ class ImportersTest extends FaTestCase
     }
 
     /**
+     * A customer can pay the same invoice twice in a day (BNZ, 7 Sep 2026:
+     * two rows of 110.40 naming invoice 260097). The payment found by the
+     * invoice is the first row's; the second row is a payment not yet there.
+     */
+    public function testASecondPaymentNamingTheSameInvoiceIsNotTakenForTheFirst(): void
+    {
+        $customer = $this->creditCustomer();
+        $line = $this->line(ImportLineModel::PT_CUSTOMER, $customer, 'On credit', [
+            'docMatch' => '/INV-[0-9]+/',
+        ]);
+        $invoice = $this->invoice($customer, $this->date(24), 'INV-' . random_int(100000, 999999));
+        $memo = 'Paying ' . $invoice['reference'];
+        $this->importer($line)->addTransaction(
+            $this->row($this->date(25), (string) $invoice['total'], 'On credit', $memo),
+            $line
+        );
+
+        $state = new ImportState();
+        $importer = Importer::fromPartyType($line->partyType, $this->fileType, $state);
+        $this->assertTrue($importer->transactionExists(
+            $this->row($this->date(25), (string) $invoice['total'], 'On credit', $memo),
+            $line
+        ));
+        $this->assertFalse(
+            $importer->transactionExists(
+                $this->row($this->date(25), (string) $invoice['total'], 'On credit', $memo),
+                $line
+            ),
+            'the second row is a second payment'
+        );
+    }
+
+    /**
      * $row is not there; addTransaction() writes it as a $type; a new import
      * finds that document, and the same importer's state then counts it used.
      */

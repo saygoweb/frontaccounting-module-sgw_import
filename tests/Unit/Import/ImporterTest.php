@@ -54,69 +54,61 @@ class ImporterTest extends TestCase
         Importer::fromPartyType(ImportLineModel::PT_SUPPLIER, $fileType, new ImportState());
     }
 
-    public function testSqlDateKeepsYyyyMmDd(): void
+    /**
+     * @return array<string, array{string, string}>
+     */
+    public function bnzDates(): array
     {
-        $importer = $this->importer(ImportFileTypeModel::DTF_YYYYMMDD);
+        $forms = [];
+        foreach ([ImportFileTypeModel::DTF_YYYYMMDD, ImportFileTypeModel::DTF_DDMMYY] as $format) {
+            $forms["$format dd/mm/yy"] = [$format, '04/03/26'];
+            $forms["$format dd/mm/yyyy"] = [$format, '04/03/2026'];
+            $forms["$format yyyy-mm-dd"] = [$format, '2026-03-04'];
+        }
+        return $forms;
+    }
 
-        $this->assertSame('2026-03-04', $importer->sqlDate('2026-03-04'));
+    /**
+     * BNZ's exports change form from one download to the next: 2026-07-07,
+     * 06/08/2026 and 08/09/26 came three months running. Each is read, under
+     * either file type, as the day it names.
+     *
+     * @dataProvider bnzDates
+     */
+    public function testSqlDateReadsEachFormBnzExports(string $format, string $date): void
+    {
+        $this->assertSame('2026-03-04', $this->importer($format)->sqlDate($date));
     }
 
     /**
      * @return array<string, array{string}>
      */
-    public function notYyyyMmDd(): array
+    public function notADate(): array
     {
         return [
-            'dd/mm/yyyy' => ['06/08/2026'],
-            'dd/mm/yy' => ['08/09/26'],
-            'no such day' => ['2026-02-30'],
+            'one-digit day and month' => ['4/3/26'],
+            'one-digit month and day' => ['2026-3-4'],
+            'no 31 September (yy)' => ['31/09/26'],
+            'no 31 September (yyyy)' => ['31/09/2026'],
+            'no 30 February' => ['2026-02-30'],
+            'dashes, day first' => ['04-03-26'],
+            'three-digit year' => ['04/03/202'],
             'empty' => [''],
         ];
     }
 
     /**
-     * BNZ's exports changed from 2026-07-07 to 06/08/2026 to 08/09/26, and MySQL
-     * stored those as 0000-00-00 and 2008-09-26.
+     * MySQL stores a malformed date as 0000-00-00 or reads it as another day,
+     * so anything else is refused.
      *
-     * @dataProvider notYyyyMmDd
+     * @dataProvider notADate
      */
-    public function testSqlDateRefusesWhatIsNotAYyyyMmDdDate(string $date): void
+    public function testSqlDateRefusesWhatIsNotADate(string $date): void
     {
-        $importer = $this->importer(ImportFileTypeModel::DTF_YYYYMMDD);
+        $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
 
         $this->expectExceptionMessage("Bad date '$date'");
         $importer->sqlDate($date);
-    }
-
-    public function testSqlDateReadsDdMmYy(): void
-    {
-        $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
-
-        $this->assertSame('2026-03-04', $importer->sqlDate('04/03/26'));
-    }
-
-    public function testSqlDateRefusesADdMmYyDateOfAnotherLength(): void
-    {
-        $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
-
-        $this->expectExceptionMessage("Bad date '4/3/26'");
-        $importer->sqlDate('4/3/26');
-    }
-
-    public function testSqlDateRefusesEightCharactersThatAreNotADdMmYyDate(): void
-    {
-        $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
-
-        $this->expectExceptionMessage("Bad date '2026-3-4'");
-        $importer->sqlDate('2026-3-4');
-    }
-
-    public function testSqlDateRefusesADdMmYyDateThatDoesNotExist(): void
-    {
-        $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
-
-        $this->expectExceptionMessage("Bad date '31/09/26'");
-        $importer->sqlDate('31/09/26');
     }
 
     public function testSqlDateRefusesAnUnknownFormat(): void

@@ -41,27 +41,37 @@ abstract class Importer
         $this->amountColumn = $fileType->columnKey($fileType->amountField);
     }
 
+    /**
+     * The forms BNZ's exports have used, which change from one download to
+     * the next (2026-07-07, 06/08/2026, 08/09/26 three months running). None
+     * can be read as another, so each is accepted whatever the file type says.
+     */
+    private const DATE_FORMS = ['d/m/y', 'd/m/Y', 'Y-m-d'];
+
     public function sqlDate($data)
     {
-        switch ($this->fileType->dateFormat) {
-            case ImportFileTypeModel::DTF_YYYYMMDD:
-                return self::parseDate('Y-m-d', $data);
-            case ImportFileTypeModel::DTF_DDMMYY:
-                return self::parseDate('d/m/y', $data);
-            default:
-                throw new \Exception(sprintf("Unsupported date format '%s'", $this->fileType->dateFormat));
+        $known = [ImportFileTypeModel::DTF_YYYYMMDD, ImportFileTypeModel::DTF_DDMMYY];
+        if (!in_array($this->fileType->dateFormat, $known, true)) {
+            throw new \Exception(sprintf("Unsupported date format '%s'", $this->fileType->dateFormat));
         }
+        foreach (self::DATE_FORMS as $format) {
+            $date = self::parseDate($format, $data);
+            if ($date !== null) {
+                return $date;
+            }
+        }
+        throw new \Exception(sprintf("Bad date '%s'", $data));
     }
 
     /**
      * MySQL stores a malformed date as 0000-00-00 or reads it as another date,
-     * so refuse anything that does not format back to exactly what was read.
+     * so only what formats back to exactly what was read is a date.
      */
-    private static function parseDate(string $format, string $data): string
+    private static function parseDate(string $format, string $data): ?string
     {
         $d = \DateTime::createFromFormat('!' . $format, $data);
         if ($d === false || $d->format($format) !== $data) {
-            throw new \Exception(sprintf("Bad date '%s'", $data));
+            return null;
         }
         return $d->format('Y-m-d');
     }
