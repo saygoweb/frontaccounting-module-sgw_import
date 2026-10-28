@@ -61,6 +61,33 @@ class ImporterTest extends TestCase
         $this->assertSame('2026-03-04', $importer->sqlDate('2026-03-04'));
     }
 
+    /**
+     * @return array<string, array{string}>
+     */
+    public function notYyyyMmDd(): array
+    {
+        return [
+            'dd/mm/yyyy' => ['06/08/2026'],
+            'dd/mm/yy' => ['08/09/26'],
+            'no such day' => ['2026-02-30'],
+            'empty' => [''],
+        ];
+    }
+
+    /**
+     * BNZ's exports changed from 2026-07-07 to 06/08/2026 to 08/09/26, and MySQL
+     * stored those as 0000-00-00 and 2008-09-26.
+     *
+     * @dataProvider notYyyyMmDd
+     */
+    public function testSqlDateRefusesWhatIsNotAYyyyMmDdDate(string $date): void
+    {
+        $importer = $this->importer(ImportFileTypeModel::DTF_YYYYMMDD);
+
+        $this->expectExceptionMessage("Bad date '$date'");
+        $importer->sqlDate($date);
+    }
+
     public function testSqlDateReadsDdMmYy(): void
     {
         $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
@@ -82,6 +109,14 @@ class ImporterTest extends TestCase
 
         $this->expectExceptionMessage("Bad date '2026-3-4'");
         $importer->sqlDate('2026-3-4');
+    }
+
+    public function testSqlDateRefusesADdMmYyDateThatDoesNotExist(): void
+    {
+        $importer = $this->importer(ImportFileTypeModel::DTF_DDMMYY);
+
+        $this->expectExceptionMessage("Bad date '31/09/26'");
+        $importer->sqlDate('31/09/26');
     }
 
     public function testSqlDateRefusesAnUnknownFormat(): void
