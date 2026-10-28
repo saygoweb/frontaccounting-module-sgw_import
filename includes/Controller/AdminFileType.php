@@ -24,6 +24,10 @@ class AdminFileType
     {
         global $Ajax;
         $fileTypeModel = null;
+        $idDelete = find_submit('Delete');
+        if ($idDelete != -1) {
+            ImportLineModel::deleteById($idDelete);
+        }
         if (list_updated('bank_id')) {
             $Ajax->activate('page_body');
             $bankId = get_post('bank_id');

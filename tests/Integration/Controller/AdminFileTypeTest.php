@@ -104,6 +104,28 @@ class AdminFileTypeTest extends FaTestCase
         $this->assertSame(['Dino Saurius', 'Phone Co'], $matches);
     }
 
+    public function testDeleteRemovesTheLine(): void
+    {
+        $fileType = $this->fileType();
+        $this->line(ImportLineModel::PT_SUPPLIER, 1, 'Dino Saurius');
+        $phone = $this->line(ImportLineModel::PT_QUICK_PAYMENT, 2, 'Phone Co');
+
+        $this->submit([
+            'id' => (string) $fileType->id,
+            'hide' => '',
+            'date_field' => '0',
+            'date_format' => ImportFileTypeModel::DTF_YYYYMMDD,
+            'amount_field' => '1',
+            'Delete' . $phone->id => 'Delete',
+        ]);
+
+        $matches = [];
+        foreach (ImportLineModel::findByBankId(self::BANK) as $line) {
+            $matches[] = $line->partyMatch;
+        }
+        $this->assertSame(['Dino Saurius'], $matches);
+    }
+
     /**
      * run() with $post.
      *
