@@ -109,6 +109,12 @@ class AdminFileTypeTest extends FaTestCase
         $fileType = $this->fileType();
         $this->line(ImportLineModel::PT_SUPPLIER, 1, 'Dino Saurius');
         $phone = $this->line(ImportLineModel::PT_QUICK_PAYMENT, 2, 'Phone Co');
+        $activated = [];
+        $ajax = $this->createMock(\Ajax::class);
+        $ajax->method('activate')->willReturnCallback(function ($name) use (&$activated) {
+            $activated[] = $name;
+        });
+        $GLOBALS['Ajax'] = $ajax;
 
         $this->submit([
             'id' => (string) $fileType->id,
@@ -124,6 +130,7 @@ class AdminFileTypeTest extends FaTestCase
             $matches[] = $line->partyMatch;
         }
         $this->assertSame(['Dino Saurius'], $matches);
+        $this->assertContains('_page_body', $activated, 'the page is redrawn over ajax');
     }
 
     /**
