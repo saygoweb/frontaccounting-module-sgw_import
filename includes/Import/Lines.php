@@ -6,7 +6,7 @@ use SGW_Import\Model\ImportLineModel;
 
 class Lines
 {
-    /** @var ImportLineModel[] */
+    /** @var ImportLineModel[][] lines by column key, then by lower case party match */
     private $idxPartyMatch = [];
 
     /** @var ImportLineModel[] */
@@ -15,9 +15,6 @@ class Lines
     /** @var ImportFileTypeModel */
     private $fileType;
 
-    /** @var bool[] */
-    private $partyColumns = [];
-
     public function __construct(int $bankId)
     {
         $this->fileType = ImportFileTypeModel::findByBankId($bankId);
@@ -25,34 +22,46 @@ class Lines
         foreach ($models as $model) {
             $m = clone $model;
             $this->lines[] = $m;
-            $this->idxPartyMatch[strtolower($model->partyMatch)] = $m;
             $columnKey = $this->fileType->columnKey($model->partyField);
-            $this->partyColumns[$columnKey] = true;
+            $this->idxPartyMatch[$columnKey][strtolower($model->partyMatch)] = $m;
         }
     }
 
     /**
+     * The line whose party match is the whole of its column in $row, ignoring
+     * case; failing that, the line with the longest party match found within
+     * its column, so 'Google CLOUD' matches 'Google CLOUD VL8RQC'.
+     *
      * @return ImportLineModel|null
      */
     public function matchingLine(Row $row)
     {
-        foreach ($this->partyColumns as $columnKey => $value) {
-            $key = strtolower($row->data[$columnKey]);
-            if (array_key_exists($key, $this->idxPartyMatch)) {
-                return $this->idxPartyMatch[$key];
+        foreach ($this->idxPartyMatch as $columnKey => $lines) {
+            $key = strtolower($row->data[$columnKey] ?? '');
+            if (array_key_exists($key, $lines)) {
+                return $lines[$key];
             }
         }
-        return null;
+        $best = null;
+        $bestLength = 0;
+        foreach ($this->idxPartyMatch as $columnKey => $lines) {
+            $haystack = strtolower($row->data[$columnKey] ?? '');
+            foreach ($lines as $match => $line) {
+                $match = (string) $match;
+                $length = strlen($match);
+                if ($length > $bestLength && strpos($haystack, $match) !== false) {
+                    $best = $line;
+                    $bestLength = $length;
+                }
+            }
+        }
+        return $best;
     }
 
     public function partyLineId(Row $row)
     {
-        $column = 2;
-        $key = strtolower($row->data[$column]);
-        if (array_key_exists($key, $this->idxPartyMatch)) {
-            return $this->idxPartyMatch[$key]->id;
-        }
-        return null;
+        $line = $this->matchingLine($row);
+        return $line ? $line->id : null;
     }
 
 }
